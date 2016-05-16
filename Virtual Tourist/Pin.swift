@@ -12,6 +12,17 @@ import CoreData
 
 class Pin: NSManagedObject {
 
-// Insert code here to add functionality to your managed object subclass
-
+    struct Keys {
+        static let Latitude = "latitude"
+        static let Longitude = "longitude"
+    }
+    
+    convenience init(lat: Float, lon: Float, context: NSManagedObjectContext) {
+        let entity = NSEntityDescription.entityForName("Pin", inManagedObjectContext: context)!
+        
+        self.init(entity: entity, insertIntoManagedObjectContext: context)
+        
+        latitude = lat
+        longitude = lon
+    }
 }
