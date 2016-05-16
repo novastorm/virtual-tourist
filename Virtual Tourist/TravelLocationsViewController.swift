@@ -13,6 +13,7 @@ import MapKit
 class TravelLocationsViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet var longPressGestureRecognizer: UILongPressGestureRecognizer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +36,24 @@ class TravelLocationsViewController: UIViewController {
         mapView.delegate = self
     }
     
+    @IBAction func handleLongPress(sender: UILongPressGestureRecognizer) {
+        print("\(#function)")
+        guard sender.state == .Began else {
+            return
+        }
+        
+        dropPin(at: sender.locationInView(mapView))
+    }
+    
+    func dropPin(at touchPoint: CGPoint) {
+        print("\(#function)")
+        
+        let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = mapCoordinate
+        
+        mapView.addAnnotation(annotation)
+    }
 }
 
 extension TravelLocationsViewController: MKMapViewDelegate {
