@@ -6,14 +6,37 @@
 //  Copyright © 2016 Adland Lee. All rights reserved.
 //
 
-import UIKit
+import CoreData
 import MapKit
+import UIKit
 
 
-class TravelLocationsViewController: UIViewController {
+class TravelLocationsViewController: UIViewController, NSFetchedResultsControllerDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet var longPressGestureRecognizer: UILongPressGestureRecognizer!
+    
+    
+    // MARK: - Core Data convenience methods
+    
+    var sharedContext: NSManagedObjectContext {
+        return CoreDataStackManager.sharedInstance.managedObjectContext
+    }
+    
+    lazy var fetchedResultsController: NSFetchedResultsController = {
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        fetchRequest.sortDescriptors = []
+        
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        return fetchedResultsController
+    }()
+    
+    func saveContext() {
+        CoreDataStackManager.sharedInstance.saveContext()
+    }
+    
+    // MARK: - View Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,7 +57,19 @@ class TravelLocationsViewController: UIViewController {
         
         mapView.setRegion(region, animated: true)
         mapView.delegate = self
+        
+        do {
+            try fetchedResultsController.performFetch()
+        }
+        catch {
+            abort()
+        }
+        
+        fetchedResultsController.delegate = self
     }
+
+    
+    // MARK: - Actions
     
     @IBAction func handleLongPress(sender: UILongPressGestureRecognizer) {
         print("\(#function)")
@@ -43,6 +78,29 @@ class TravelLocationsViewController: UIViewController {
         }
         
         dropPin(at: sender.locationInView(mapView))
+    }
+    
+    
+    // MARK: - Helpers
+    
+    func updateMapAnnotations() {
+        let pins = fetchedResultsController.fetchedObjects as! [Pin]
+        var annotations = [MKPointAnnotation]()
+        
+        for pin in pins {
+            let lat = pin.latitude as! Double
+            let lon = pin.longitude as! Double
+            let coord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coord
+            
+            annotations.append(annotation)
+        }
+        
+        performUIUpdatesOnMain {
+            self.mapView.removeAnnotations(self.mapView.annotations)
+            self.mapView.addAnnotations(annotations)
+        }
     }
     
     func dropPin(at touchPoint: CGPoint) {

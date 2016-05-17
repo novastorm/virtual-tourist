@@ -13,10 +13,6 @@ private let SQLITE_FILE_NAME = "VirtualTourist.sqlite"
 
 class CoreDataStackManager {
     
-
-
-    
-    
     // MARK: - Shared Instance
     
     /**
@@ -34,7 +30,7 @@ class CoreDataStackManager {
     // adapted from http://www.cimgf.com/2014/06/08/the-core-data-stack-in-swift/
     
     lazy var managedObjectContext: NSManagedObjectContext = {
-        let modelURL = NSBundle.mainBundle().URLForResource("Model", withExtension: "momd")!
+        let modelURL = NSBundle.mainBundle().URLForResource("Virtual_Tourist", withExtension: "momd")!
         let mom = NSManagedObjectModel(contentsOfURL: modelURL)!
         let psc = NSPersistentStoreCoordinator(managedObjectModel: mom)
         
@@ -48,7 +44,7 @@ class CoreDataStackManager {
             try psc.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: storeURL, options: nil)
         }
         catch {
-            // Report any error we got.
+            // Report any errors.
             var dict = [String: AnyObject]()
             dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
             dict[NSLocalizedFailureReasonErrorKey] = failureReason
