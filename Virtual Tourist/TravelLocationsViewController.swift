@@ -74,24 +74,6 @@ extension TravelLocationsViewController: MKMapViewDelegate {
         saveMapViewRegion(mapView.region)
     }
     
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-        let reuseIdentifier = "TravelLocationAnnotation"
-        let aAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
-        
-        aAnnotationView.draggable = true
-        
-        return aAnnotationView
-    }
-    
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, didChangeDragState newState: MKAnnotationViewDragState, fromOldState oldState: MKAnnotationViewDragState) {
-        switch (newState) {
-        case .Ending:
-            print("pin drag ended")
-        default:
-            break
-        }
-    }
-    
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         print("\(#function)")
     }
