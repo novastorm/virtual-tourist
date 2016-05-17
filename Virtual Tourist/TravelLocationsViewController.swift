@@ -13,6 +13,7 @@ import MapKit
 class TravelLocationsViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet var longPressGestureRecognizer: UILongPressGestureRecognizer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,11 +36,46 @@ class TravelLocationsViewController: UIViewController {
         mapView.delegate = self
     }
     
+    @IBAction func handleLongPress(sender: UILongPressGestureRecognizer) {
+        print("\(#function)")
+        guard sender.state == .Began else {
+            return
+        }
+        
+        dropPin(at: sender.locationInView(mapView))
+    }
+    
+    func dropPin(at touchPoint: CGPoint) {
+        print("\(#function)")
+        
+        let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = mapCoordinate
+        
+        mapView.addAnnotation(annotation)
+    }
+    
+    func saveMapViewRegion(region: MKCoordinateRegion) {
+        NSUserDefaults.standardUserDefaults().setObject([
+            "latitude": region.center.latitude,
+            "longitude": region.center.longitude,
+            "latitudeDelta": region.span.latitudeDelta,
+            "longitudeDelta": region.span.longitudeDelta
+            ], forKey: AppDelegate.UserDefaultKeys.MapViewRegion)
+    }
 }
+
+
+// MARK: - MKMapViewDelegate extentions
 
 extension TravelLocationsViewController: MKMapViewDelegate {
     
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        (UIApplication.sharedApplication().delegate as! AppDelegate).saveMapViewRegion(mapView.region)
+        saveMapViewRegion(mapView.region)
     }
+    
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        print("\(#function)")
+    }
+    
 }
