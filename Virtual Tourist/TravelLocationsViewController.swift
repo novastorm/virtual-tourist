@@ -83,6 +83,15 @@ extension TravelLocationsViewController: MKMapViewDelegate {
         return aAnnotationView
     }
     
+    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, didChangeDragState newState: MKAnnotationViewDragState, fromOldState oldState: MKAnnotationViewDragState) {
+        switch (newState) {
+        case .Ending:
+            print("pin drag ended")
+        default:
+            break
+        }
+    }
+    
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         print("\(#function)")
     }
