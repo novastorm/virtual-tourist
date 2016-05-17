@@ -73,14 +73,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return
         }
     }
-    
-    func saveMapViewRegion(region: MKCoordinateRegion) {
-        NSUserDefaults.standardUserDefaults().setObject([
-            "latitude": region.center.latitude,
-            "longitude": region.center.longitude,
-            "latitudeDelta": region.span.latitudeDelta,
-            "longitudeDelta": region.span.longitudeDelta
-            ], forKey: UserDefaultKeys.MapViewRegion)
-    }
 }
 

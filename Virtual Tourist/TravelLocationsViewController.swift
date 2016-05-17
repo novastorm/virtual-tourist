@@ -54,11 +54,37 @@ class TravelLocationsViewController: UIViewController {
         
         mapView.addAnnotation(annotation)
     }
+    
+    func saveMapViewRegion(region: MKCoordinateRegion) {
+        NSUserDefaults.standardUserDefaults().setObject([
+            "latitude": region.center.latitude,
+            "longitude": region.center.longitude,
+            "latitudeDelta": region.span.latitudeDelta,
+            "longitudeDelta": region.span.longitudeDelta
+            ], forKey: AppDelegate.UserDefaultKeys.MapViewRegion)
+    }
 }
+
+
+// MARK: - MKMapViewDelegate extentions
 
 extension TravelLocationsViewController: MKMapViewDelegate {
     
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        (UIApplication.sharedApplication().delegate as! AppDelegate).saveMapViewRegion(mapView.region)
+        saveMapViewRegion(mapView.region)
     }
+    
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        let reuseIdentifier = "TravelLocationAnnotation"
+        let aAnnotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
+        
+        aAnnotationView.draggable = true
+        
+        return aAnnotationView
+    }
+    
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        print("\(#function)")
+    }
+    
 }
