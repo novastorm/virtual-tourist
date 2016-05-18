@@ -50,7 +50,7 @@ class TravelLocationsViewController: UIViewController {
                 savedRegion["longitude"] as! Double
                 ),
             span: MKCoordinateSpan(
-                latitudeDelta: savedRegion["latitudeDelta"] as! Double,
+                 latitudeDelta: savedRegion["latitudeDelta"] as! Double,
                 longitudeDelta: savedRegion["longitudeDelta"] as! Double
                 )
             )
@@ -75,11 +75,20 @@ class TravelLocationsViewController: UIViewController {
     
     @IBAction func handleLongPress(sender: UILongPressGestureRecognizer) {
         print("\(#function)")
-        guard sender.state == .Began else {
-            return
+        switch sender.state {
+        case .Began:
+            addPin(at: sender.locationInView(mapView))
+            // refactor to setup pin and draggable
+            break
+        case .Changed:
+            // have pin track user touch location
+            break
+        case .Ended:
+            // drop pin at last touchpoint
+            break
+        default:
+            break
         }
-        
-        dropPin(at: sender.locationInView(mapView))
     }
     
     
@@ -87,7 +96,7 @@ class TravelLocationsViewController: UIViewController {
     
     func updateMapAnnotations() {
         let pins = fetchedResultsController.fetchedObjects as! [Pin]
-        var annotations = [MKPointAnnotation]()
+        var annotations = [MKAnnotation]()
         
         for pin in pins {
             let lat = pin.latitude as! Double
@@ -105,7 +114,7 @@ class TravelLocationsViewController: UIViewController {
         }
     }
     
-    func dropPin(at touchPoint: CGPoint) {
+    func addPin(at touchPoint: CGPoint) {
         print("\(#function)")
         
         let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
@@ -124,9 +133,9 @@ class TravelLocationsViewController: UIViewController {
     
     func saveMapViewRegion(region: MKCoordinateRegion) {
         NSUserDefaults.standardUserDefaults().setObject([
-            "latitude": region.center.latitude,
-            "longitude": region.center.longitude,
-            "latitudeDelta": region.span.latitudeDelta,
+                  "latitude": region.center.latitude,
+                 "longitude": region.center.longitude,
+             "latitudeDelta": region.span.latitudeDelta,
             "longitudeDelta": region.span.longitudeDelta
             ], forKey: AppDelegate.UserDefaultKeys.MapViewRegion)
     }
