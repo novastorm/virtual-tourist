@@ -11,7 +11,7 @@ import MapKit
 import UIKit
 
 
-class TravelLocationsViewController: UIViewController, NSFetchedResultsControllerDelegate {
+class TravelLocationsViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet var longPressGestureRecognizer: UILongPressGestureRecognizer!
@@ -58,14 +58,16 @@ class TravelLocationsViewController: UIViewController, NSFetchedResultsControlle
         mapView.setRegion(region, animated: true)
         mapView.delegate = self
         
+        fetchedResultsController.delegate = self
+
         do {
             try fetchedResultsController.performFetch()
         }
         catch {
             abort()
         }
+        updateMapAnnotations()
         
-        fetchedResultsController.delegate = self
     }
 
     
@@ -110,6 +112,13 @@ class TravelLocationsViewController: UIViewController, NSFetchedResultsControlle
         let annotation = MKPointAnnotation()
         annotation.coordinate = mapCoordinate
         
+        let _ = Pin(
+            lat: mapCoordinate.latitude,
+            lon: mapCoordinate.longitude,
+            context: sharedContext)
+        
+        saveContext()
+        
         mapView.addAnnotation(annotation)
     }
     
@@ -136,4 +145,11 @@ extension TravelLocationsViewController: MKMapViewDelegate {
         print("\(#function)")
     }
     
+}
+
+extension TravelLocationsViewController: NSFetchedResultsControllerDelegate {
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        updateMapAnnotations()
+    }
 }
