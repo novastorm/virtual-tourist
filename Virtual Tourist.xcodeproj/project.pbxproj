@@ -18,6 +18,7 @@
 		3E1971D61CE54CEC004FC65E /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1971D51CE54CEC004FC65E /* CoreDataStackManager.swift */; };
 		3E1971DB1CE55EFC004FC65E /* Pin+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1971D91CE55EFC004FC65E /* Pin+CoreDataProperties.swift */; };
 		3E1971DC1CE55EFC004FC65E /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1971DA1CE55EFC004FC65E /* Pin.swift */; };
+		3E6A3E851CECEFC400346705 /* PinDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E841CECEFC400346705 /* PinDetailViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 		3E1971D91CE55EFC004FC65E /* Pin+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Pin+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3E1971DA1CE55EFC004FC65E /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
 		3E1971DE1CEA0F2D004FC65E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		3E6A3E841CECEFC400346705 /* PinDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinDetailViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +75,7 @@
 				3E1971D71CE55A79004FC65E /* CoreData */,
 				3E1971BC1CE3FF81004FC65E /* AppDelegate.swift */,
 				3E1971BE1CE3FF81004FC65E /* TravelLocationsViewController.swift */,
+				3E6A3E841CECEFC400346705 /* PinDetailViewController.swift */,
 				3E1971C01CE3FF81004FC65E /* Main.storyboard */,
 				3E1971C61CE3FF81004FC65E /* Assets.xcassets */,
 				3E1971C81CE3FF81004FC65E /* LaunchScreen.storyboard */,
@@ -183,6 +186,7 @@
 				3E1971D41CE54C3A004FC65E /* GCDUtilities.swift in Sources */,
 				3E1971BF1CE3FF81004FC65E /* TravelLocationsViewController.swift in Sources */,
 				3E1971DC1CE55EFC004FC65E /* Pin.swift in Sources */,
+				3E6A3E851CECEFC400346705 /* PinDetailViewController.swift in Sources */,
 				3E1971DB1CE55EFC004FC65E /* Pin+CoreDataProperties.swift in Sources */,
 				3E1971C51CE3FF81004FC65E /* Virtual_Tourist.xcdatamodeld in Sources */,
 				3E1971BD1CE3FF81004FC65E /* AppDelegate.swift in Sources */,
@@ -336,6 +340,7 @@
 				3E1971D01CE3FF81004FC65E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 

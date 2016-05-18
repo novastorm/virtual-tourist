@@ -38,6 +38,10 @@ class TravelLocationsViewController: UIViewController {
     
     // MARK: - View Cycle
     
+    override func prefersStatusBarHidden() -> Bool {
+        return true
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -151,7 +155,13 @@ extension TravelLocationsViewController: MKMapViewDelegate {
     }
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
-        print("\(#function)")
+        mapView.deselectAnnotation(view.annotation, animated: true)
+        
+        let PinDetailVC = storyboard?.instantiateViewControllerWithIdentifier("PinDetailViewController") as! PinDetailViewController
+        
+        PinDetailVC.annotation = view.annotation
+        
+        presentViewController(PinDetailVC, animated: true, completion: nil)
     }
     
 }
