@@ -19,6 +19,10 @@
 		3E1971DB1CE55EFC004FC65E /* Pin+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1971D91CE55EFC004FC65E /* Pin+CoreDataProperties.swift */; };
 		3E1971DC1CE55EFC004FC65E /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1971DA1CE55EFC004FC65E /* Pin.swift */; };
 		3E6A3E851CECEFC400346705 /* PinDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E841CECEFC400346705 /* PinDetailViewController.swift */; };
+		3E6A3E871CED211800346705 /* FlickrClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E861CED211800346705 /* FlickrClient.swift */; };
+		3E6A3E891CED21F600346705 /* FlickrClient+Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E881CED21F600346705 /* FlickrClient+Constants.swift */; };
+		3E6A3E8B1CED454D00346705 /* FlickrClient+ConvenienceMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E8A1CED454D00346705 /* FlickrClient+ConvenienceMethods.swift */; };
+		3E6A3E8D1CED731200346705 /* ErrorCodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E8C1CED731200346705 /* ErrorCodes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +41,10 @@
 		3E1971DA1CE55EFC004FC65E /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
 		3E1971DE1CEA0F2D004FC65E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		3E6A3E841CECEFC400346705 /* PinDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinDetailViewController.swift; sourceTree = "<group>"; };
+		3E6A3E861CED211800346705 /* FlickrClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrClient.swift; sourceTree = "<group>"; };
+		3E6A3E881CED21F600346705 /* FlickrClient+Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FlickrClient+Constants.swift"; sourceTree = "<group>"; };
+		3E6A3E8A1CED454D00346705 /* FlickrClient+ConvenienceMethods.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FlickrClient+ConvenienceMethods.swift"; sourceTree = "<group>"; };
+		3E6A3E8C1CED731200346705 /* ErrorCodes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorCodes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +91,7 @@
 				3E1971C31CE3FF81004FC65E /* Virtual_Tourist.xcdatamodeld */,
 				3E1971D11CE54BD3004FC65E /* Utilites.swift */,
 				3E1971D31CE54C3A004FC65E /* GCDUtilities.swift */,
+				3E6A3E8C1CED731200346705 /* ErrorCodes.swift */,
 			);
 			path = "Virtual Tourist";
 			sourceTree = "<group>";
@@ -107,6 +116,9 @@
 		3E1971DD1CE7DF18004FC65E /* Clients */ = {
 			isa = PBXGroup;
 			children = (
+				3E6A3E861CED211800346705 /* FlickrClient.swift */,
+				3E6A3E8A1CED454D00346705 /* FlickrClient+ConvenienceMethods.swift */,
+				3E6A3E881CED21F600346705 /* FlickrClient+Constants.swift */,
 			);
 			name = Clients;
 			sourceTree = "<group>";
@@ -183,9 +195,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				3E1971D21CE54BD3004FC65E /* Utilites.swift in Sources */,
+				3E6A3E871CED211800346705 /* FlickrClient.swift in Sources */,
+				3E6A3E8B1CED454D00346705 /* FlickrClient+ConvenienceMethods.swift in Sources */,
 				3E1971D41CE54C3A004FC65E /* GCDUtilities.swift in Sources */,
+				3E6A3E891CED21F600346705 /* FlickrClient+Constants.swift in Sources */,
 				3E1971BF1CE3FF81004FC65E /* TravelLocationsViewController.swift in Sources */,
 				3E1971DC1CE55EFC004FC65E /* Pin.swift in Sources */,
+				3E6A3E8D1CED731200346705 /* ErrorCodes.swift in Sources */,
 				3E6A3E851CECEFC400346705 /* PinDetailViewController.swift in Sources */,
 				3E1971DB1CE55EFC004FC65E /* Pin+CoreDataProperties.swift in Sources */,
 				3E1971C51CE3FF81004FC65E /* Virtual_Tourist.xcdatamodeld in Sources */,

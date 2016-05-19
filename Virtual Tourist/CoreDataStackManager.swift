@@ -79,6 +79,19 @@ class CoreDataStackManager {
             abort()
         }
     }
+    
+    func autoSave(delayInSeconds delay: Int) {
+        if delay > 0 {
+            saveContext()
+        }
+        
+        let delayInNanoSeconds = UInt64(delay) + NSEC_PER_SEC
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delayInNanoSeconds))
+        
+        dispatch_after(time, dispatch_get_main_queue()) {
+            self.autoSave(delayInSeconds: delay)
+        }
+    }
 }
 
 
