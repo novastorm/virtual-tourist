@@ -38,6 +38,16 @@ class PinDetailViewController: UIViewController {
             self.mapView.removeAnnotations(self.mapView.annotations)
             self.mapView.addAnnotation(self.annotation)
         }
+        
+        FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
+            print("\(#function)")
+            if let error = error {
+                print(error)
+                return
+            }
+            
+            print(results)
+        }
     }
 
     // MARK: - Actions

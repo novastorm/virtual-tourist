@@ -14,7 +14,7 @@ extension FlickrClient {
         static let Key = "6623dc3039aaa921037bf3ea4d50d66e"
         static let Scheme = "https"
         static let Host = "api.flickr.com"
-        static let Path = "/service/rest"
+        static let Path = "/services/rest"
     }
     
     // MARK: - Config
@@ -24,7 +24,18 @@ extension FlickrClient {
         static let SearchBBoxHalfHeight = 1.0
         static let SearchLatRange = (-90.0, 90.0)
         static let SearchLonRange = (-180.0, 180.0)
+        static let ResponseFormat = "json"
     }
+    
+    
+    // MARK: - Resources
+    
+    struct Methods {
+        struct Photos {
+            static let Search = "flickr.photos.search"
+        }
+    }
+    
     
     
     // MARK: - ParameterKeys
@@ -46,9 +57,9 @@ extension FlickrClient {
     // MARK: - ParameterValues
     
     struct ParameterValues {
-        static let SearchMethod = "flickr.photos.search"
+//        static let SearchMethod = "flickr.photos.search"
         static let APIKey = API.Key
-        static let ResponseFormat = "json"
+        static let ResponseFormat = Config.ResponseFormat
         static let DisableJSONCallback = "1" /* 1 means "yes" */
         static let GalleryPhotosMethod = "flickr.galleries.getPhotos"
         static let GalleryID = "5704-72157622566655097"
