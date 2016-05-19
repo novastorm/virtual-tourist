@@ -39,15 +39,7 @@ class PinDetailViewController: UIViewController {
             self.mapView.addAnnotation(self.annotation)
         }
         
-        FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
-            print("\(#function)")
-            if let error = error {
-                print(error)
-                return
-            }
-            
-            print(results)
-        }
+        getPhotos()
     }
 
     // MARK: - Actions
@@ -57,4 +49,26 @@ class PinDetailViewController: UIViewController {
     }
     
     // MARK: - Helpers
+    
+    func getPhotos() {
+        let lat = annotation.coordinate.latitude
+        let lon = annotation.coordinate.longitude
+
+        FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
+            print("\(#function)")
+            if let error = error {
+                print(error)
+                return
+            }
+            
+            let data = results![FlickrClient.ResponseKeys.Photos] as! [String: AnyObject]
+            let pages = data[FlickrClient.Photos.Pages] as! Int
+            let randomPage = random(pages, start: 1)
+            
+            FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon, page: randomPage) { (results, error) in
+                print(results)
+            }
+        }
+        
+    }
 }

@@ -78,20 +78,20 @@
 		3E1971BB1CE3FF81004FC65E /* Virtual Tourist */ = {
 			isa = PBXGroup;
 			children = (
+				3E1971BE1CE3FF81004FC65E /* TravelLocationsViewController.swift */,
+				3E6A3E841CECEFC400346705 /* PinDetailViewController.swift */,
 				3E1971DD1CE7DF18004FC65E /* Clients */,
 				3E1971D81CE55ED8004FC65E /* Models */,
 				3E1971D71CE55A79004FC65E /* CoreData */,
 				3E1971BC1CE3FF81004FC65E /* AppDelegate.swift */,
-				3E1971BE1CE3FF81004FC65E /* TravelLocationsViewController.swift */,
-				3E6A3E841CECEFC400346705 /* PinDetailViewController.swift */,
+				3E1971D11CE54BD3004FC65E /* Utilites.swift */,
+				3E1971D31CE54C3A004FC65E /* GCDUtilities.swift */,
+				3E6A3E8C1CED731200346705 /* ErrorCodes.swift */,
 				3E1971C01CE3FF81004FC65E /* Main.storyboard */,
 				3E1971C61CE3FF81004FC65E /* Assets.xcassets */,
 				3E1971C81CE3FF81004FC65E /* LaunchScreen.storyboard */,
 				3E1971CB1CE3FF81004FC65E /* Info.plist */,
 				3E1971C31CE3FF81004FC65E /* Virtual_Tourist.xcdatamodeld */,
-				3E1971D11CE54BD3004FC65E /* Utilites.swift */,
-				3E1971D31CE54C3A004FC65E /* GCDUtilities.swift */,
-				3E6A3E8C1CED731200346705 /* ErrorCodes.swift */,
 			);
 			path = "Virtual Tourist";
 			sourceTree = "<group>";

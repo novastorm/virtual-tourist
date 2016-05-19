@@ -120,7 +120,6 @@ class TravelLocationsViewController: UIViewController {
     }
     
     func addPin(at touchPoint: CGPoint) {
-        print("\(#function)")
         
         let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
         let annotation = MKPointAnnotation()

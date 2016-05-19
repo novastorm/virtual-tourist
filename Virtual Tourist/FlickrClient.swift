@@ -39,7 +39,7 @@ class FlickrClient {
                 var userInfo = [String: AnyObject]()
                 
                 userInfo[NSLocalizedDescriptionKey] = errorString
-                userInfo[NSUnderlyingErrorKey] = errorString
+                userInfo[NSUnderlyingErrorKey] = error
                 userInfo["http_response"] = response
                 
                 completionHandler(results: nil, error: NSError(domain: "taskForGetMethod", code: code, userInfo: userInfo))
