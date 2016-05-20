@@ -6,6 +6,7 @@
 //  Copyright © 2016 Adland Lee. All rights reserved.
 //
 
+import CoreData
 import MapKit
 import UIKit
 
@@ -14,7 +15,30 @@ class PinDetailViewController: UIViewController {
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
     
-    var annotation: MKAnnotation!
+    var annotation: PinAnnotation!
+    
+    
+    // MARK: - Core Data convenience methods
+    
+    var sharedContext: NSManagedObjectContext {
+        return CoreDataStackManager.sharedInstance.managedObjectContext
+    }
+    
+    lazy var fetchedResultsController: NSFetchedResultsController = {
+        
+        let fetchRequest = NSFetchRequest(entityName: "Photo")
+        fetchRequest.sortDescriptors = []
+        fetchRequest.predicate = NSPredicate(format: "pin = %@", self.annotation.pin)
+        
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        return fetchedResultsController
+    }()
+    
+    func saveContext() {
+        CoreDataStackManager.sharedInstance.saveContext()
+    }
+    
     
     // MARK: - View Cycle
     
@@ -39,7 +63,9 @@ class PinDetailViewController: UIViewController {
             self.mapView.addAnnotation(self.annotation)
         }
         
-        getPhotos()
+        if annotation.pin.photos?.count == 0 {
+            getPhotos()
+        }
     }
 
     // MARK: - Actions

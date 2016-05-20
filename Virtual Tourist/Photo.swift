@@ -11,7 +11,16 @@ import CoreData
 
 
 class Photo: NSManagedObject {
-
-// Insert code here to add functionality to your managed object subclass
-
+    
+    struct Keys {
+        static let ImageData = "imageData"
+    }
+    
+    convenience init(imageData: NSData, context: NSManagedObjectContext) {
+        let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
+        
+        self.init(entity: entity, insertIntoManagedObjectContext: context)
+        
+        self.imageData = imageData
+    }
 }

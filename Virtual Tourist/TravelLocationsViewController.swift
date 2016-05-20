@@ -104,11 +104,7 @@ class TravelLocationsViewController: UIViewController {
         var annotations = [MKAnnotation]()
         
         for pin in pins {
-            let lat = pin.latitude as! Double
-            let lon = pin.longitude as! Double
-            let coord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = coord
+            let annotation = PinAnnotation(withPin: pin)
             
             annotations.append(annotation)
         }
@@ -122,16 +118,17 @@ class TravelLocationsViewController: UIViewController {
     func addPin(at touchPoint: CGPoint) {
         
         let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = mapCoordinate
+//        let annotation = MKPointAnnotation()
+//        annotation.coordinate = mapCoordinate
         
-        let _ = Pin(
+        let pin = Pin(
             lat: mapCoordinate.latitude,
             lon: mapCoordinate.longitude,
             context: sharedContext)
         
         saveContext()
         
+        let annotation = PinAnnotation(withPin: pin)
         mapView.addAnnotation(annotation)
     }
     
@@ -159,7 +156,7 @@ extension TravelLocationsViewController: MKMapViewDelegate {
         
         let PinDetailVC = storyboard?.instantiateViewControllerWithIdentifier("PinDetailViewController") as! PinDetailViewController
         
-        PinDetailVC.annotation = view.annotation
+        PinDetailVC.annotation = view.annotation as! PinAnnotation
         
         presentViewController(PinDetailVC, animated: true, completion: nil)
     }

@@ -25,6 +25,7 @@
 		3E6A3E8D1CED731200346705 /* ErrorCodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E8C1CED731200346705 /* ErrorCodes.swift */; };
 		3E6A3E971CEE8F7900346705 /* Photo+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E951CEE8F7900346705 /* Photo+CoreDataProperties.swift */; };
 		3E6A3E981CEE8F7900346705 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E961CEE8F7900346705 /* Photo.swift */; };
+		3E6A3E9A1CEF96E300346705 /* PinAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E991CEF96E300346705 /* PinAnnotation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +51,7 @@
 		3E6A3E8E1CEE892F00346705 /* Virtual_Tourist 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Virtual_Tourist 2.xcdatamodel"; sourceTree = "<group>"; };
 		3E6A3E951CEE8F7900346705 /* Photo+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Photo+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3E6A3E961CEE8F7900346705 /* Photo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
+		3E6A3E991CEF96E300346705 /* PinAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinAnnotation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +87,7 @@
 			children = (
 				3E1971BE1CE3FF81004FC65E /* TravelLocationsViewController.swift */,
 				3E6A3E841CECEFC400346705 /* PinDetailViewController.swift */,
+				3E6A3E991CEF96E300346705 /* PinAnnotation.swift */,
 				3E1971DD1CE7DF18004FC65E /* Clients */,
 				3E1971D81CE55ED8004FC65E /* Models */,
 				3E1971D71CE55A79004FC65E /* CoreData */,
@@ -201,6 +204,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3E6A3E9A1CEF96E300346705 /* PinAnnotation.swift in Sources */,
 				3E6A3E971CEE8F7900346705 /* Photo+CoreDataProperties.swift in Sources */,
 				3E1971D21CE54BD3004FC65E /* Utilites.swift in Sources */,
 				3E6A3E871CED211800346705 /* FlickrClient.swift in Sources */,
