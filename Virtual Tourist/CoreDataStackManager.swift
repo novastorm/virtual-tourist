@@ -40,8 +40,13 @@ class CoreDataStackManager {
         
         var failureReason = "There was an error creating or loading the application's saved data."
         
+        let pscOptions = [
+            NSInferMappingModelAutomaticallyOption: true,
+            NSMigratePersistentStoresAutomaticallyOption: true
+            ]
+        
         do {
-            try psc.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: storeURL, options: nil)
+            try psc.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: storeURL, options: pscOptions)
         }
         catch {
             // Report any errors.
