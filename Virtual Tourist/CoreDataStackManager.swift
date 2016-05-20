@@ -62,7 +62,7 @@ class CoreDataStackManager {
             abort()
         }
         
-        var managedObjectContext = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
+        var managedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = psc
         
         return managedObjectContext
