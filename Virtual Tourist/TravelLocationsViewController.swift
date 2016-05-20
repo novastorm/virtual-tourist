@@ -60,7 +60,7 @@ class TravelLocationsViewController: UIViewController {
             )
         
         mapView.setRegion(region, animated: false)
-        mapView.setCenterCoordinate(region.center, animated: false)
+        mapView.setCenterCoordinate(region.center, animated: true)
         mapView.delegate = self
         
         fetchedResultsController.delegate = self
