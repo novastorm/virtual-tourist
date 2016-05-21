@@ -17,6 +17,16 @@ class PinDetailViewController: UIViewController {
     
     var annotation: PinAnnotation!
     
+    // The selected indexes array keeps all of the indexPaths for cells that are "selected". The array is
+    // used inside cellForItemAtIndexPath to lower the alpha of selected cells.  You can see how the array
+    // works by searchign through the code for 'selectedIndexes'
+    var selectedIndexes = [NSIndexPath]()
+    
+    // Keep the changes. We will keep track of insertions, deletions, and updates.
+    var insertedIndexPaths: [NSIndexPath]!
+    var deletedIndexPaths: [NSIndexPath]!
+    var updatedIndexPaths: [NSIndexPath]!
+
     
     // MARK: - Core Data convenience methods
     
@@ -46,6 +56,17 @@ class PinDetailViewController: UIViewController {
         return true
     }
     
+    override func viewDidLoad() {
+                
+        do {
+            try fetchedResultsController.performFetch()
+            print("perform fetch")
+        }
+        catch let error as NSError {
+            print("Error performining initial fetch: \(error)")
+        }
+    }
+    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -63,8 +84,8 @@ class PinDetailViewController: UIViewController {
             self.mapView.addAnnotation(self.annotation)
         }
         
-        if annotation.pin.photos?.count == 0 {
-            getPhotos()
+        if annotation.pin.photos.count == 0 {
+            getPhotos(forPin: annotation.pin)
         }
     }
 
@@ -76,9 +97,9 @@ class PinDetailViewController: UIViewController {
     
     // MARK: - Helpers
     
-    func getPhotos() {
-        let lat = annotation.coordinate.latitude
-        let lon = annotation.coordinate.longitude
+    func getPhotos(forPin pin: Pin) {
+        let lat = pin.latitude as Double
+        let lon = pin.longitude as Double
 
         FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
             print("\(#function)")
@@ -92,9 +113,132 @@ class PinDetailViewController: UIViewController {
             let randomPage = random(pages, start: 1)
             
             FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon, page: randomPage) { (results, error) in
-                print(results)
+
+                if let error = error {
+                    print(error)
+                    return
+                }
+                
+                guard let photos = results?[FlickrClient.ResponseKeys.Photos]??[FlickrClient.Photos.Photo] as? [[String:AnyObject]] else {
+                    print("Cannot find photo list in Photos object")
+                    return
+                }
+                
+//                print(photos)
+                let _ = photos.map() { (photo: [String: AnyObject]) -> Photo in
+                    let imageURL = NSURL(string: photo[FlickrClient.Photo.MediumURL] as! String)
+//                    print(imageURL)
+                    let imageData = NSData(contentsOfURL: imageURL!)
+//                    print(imageData)
+                    let photo = Photo(imageData: imageData!, context: self.sharedContext)
+                    photo.pin = self.annotation.pin
+                    
+                    return photo
+                }
+                
+                performUIUpdatesOnMain{
+                    self.collectionView.reloadData()
+                }
+                
+                self.saveContext()
             }
         }
         
+    }
+}
+
+
+// MARK: - Collection View Data Source
+
+extension PinDetailViewController: UICollectionViewDataSource {
+    
+    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+        return fetchedResultsController.sections?.count ?? 0
+    }
+    
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        
+        let sectionInfo = fetchedResultsController.sections![section]
+        
+        return sectionInfo.numberOfObjects
+    }
+    
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        
+        let identifier = "PinPhoto"
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as! PinPhotoCollectionViewCell
+        
+        configureCell(cell, atIndexPath: indexPath)
+        
+        return cell
+    }
+    
+    func configureCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+        let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+        let imageData = photo.imageData
+        
+        cell.imageView.image = UIImage(data: imageData!)
+    }
+}
+
+
+// MARK: - Collection View Data Source
+
+extension PinDetailViewController: UICollectionViewDelegate {
+    
+}
+
+
+// MARK: - Fetched Results Controller Delegate
+
+extension PinDetailViewController: NSFetchedResultsControllerDelegate {
+    
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        insertedIndexPaths = [NSIndexPath]()
+        deletedIndexPaths = [NSIndexPath]()
+        updatedIndexPaths = [NSIndexPath]()
+        
+        print("\(#function)")
+    }
+    
+    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        
+        print("\(#function)")
+        
+        switch type {
+        case .Insert:
+            print("Insert")
+            insertedIndexPaths.append(newIndexPath!)
+        case .Delete:
+            print("Delete")
+            deletedIndexPaths.append(indexPath!)
+        case .Update:
+            print("Update")
+            updatedIndexPaths.append(indexPath!)
+//        case .Move:
+//            print("Move")
+        default:
+            break
+        }
+    }
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        print("\(#function)")
+        print("queued changes - Insert:\(insertedIndexPaths.count), Delete:\(deletedIndexPaths.count)")
+        
+        collectionView.performBatchUpdates( { () -> Void in
+            
+            for indexPath in self.insertedIndexPaths {
+                self.collectionView.insertItemsAtIndexPaths([indexPath])
+            }
+            
+            for indexPath in self.deletedIndexPaths {
+                self.collectionView.deleteItemsAtIndexPaths([indexPath])
+            }
+            
+            for indexPath in self.updatedIndexPaths {
+                self.collectionView.reloadItemsAtIndexPaths([indexPath])
+            }
+        }, completion: nil)
     }
 }

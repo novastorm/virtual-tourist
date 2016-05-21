@@ -14,6 +14,7 @@ class Photo: NSManagedObject {
     
     struct Keys {
         static let ImageData = "imageData"
+        static let Pin = "pin"
     }
     
     convenience init(imageData: NSData, context: NSManagedObjectContext) {
