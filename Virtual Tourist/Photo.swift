@@ -14,14 +14,17 @@ class Photo: NSManagedObject {
     
     struct Keys {
         static let ImageData = "imageData"
+        static let ImageURLString = "imageURL"
         static let Pin = "pin"
     }
     
-    convenience init(imageData: NSData, context: NSManagedObjectContext) {
+    convenience init(imageURLString: String, context: NSManagedObjectContext) {
         let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
         
         self.init(entity: entity, insertIntoManagedObjectContext: context)
         
-        self.imageData = imageData
+        self.imageURLString = imageURLString
     }
+    
+    
 }

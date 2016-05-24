@@ -27,6 +27,7 @@
 		3E6A3E981CEE8F7900346705 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E961CEE8F7900346705 /* Photo.swift */; };
 		3E6A3E9A1CEF96E300346705 /* PinAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E991CEF96E300346705 /* PinAnnotation.swift */; };
 		3E6A3E9C1CEFEE3200346705 /* PinPhotoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E9B1CEFEE3200346705 /* PinPhotoCollectionViewCell.swift */; };
+		3E6A3EA01CF39A1600346705 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6A3E9F1CF39A1600346705 /* CoreDataStack.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		3E6A3E961CEE8F7900346705 /* Photo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		3E6A3E991CEF96E300346705 /* PinAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinAnnotation.swift; sourceTree = "<group>"; };
 		3E6A3E9B1CEFEE3200346705 /* PinPhotoCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinPhotoCollectionViewCell.swift; sourceTree = "<group>"; };
+		3E6A3E9F1CF39A1600346705 /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				3E1971D51CE54CEC004FC65E /* CoreDataStackManager.swift */,
+				3E6A3E9F1CF39A1600346705 /* CoreDataStack.swift */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -210,6 +213,7 @@
 				3E6A3E9A1CEF96E300346705 /* PinAnnotation.swift in Sources */,
 				3E6A3E971CEE8F7900346705 /* Photo+CoreDataProperties.swift in Sources */,
 				3E1971D21CE54BD3004FC65E /* Utilites.swift in Sources */,
+				3E6A3EA01CF39A1600346705 /* CoreDataStack.swift in Sources */,
 				3E6A3E871CED211800346705 /* FlickrClient.swift in Sources */,
 				3E6A3E8B1CED454D00346705 /* FlickrClient+ConvenienceMethods.swift in Sources */,
 				3E1971D41CE54C3A004FC65E /* GCDUtilities.swift in Sources */,

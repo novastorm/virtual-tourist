@@ -31,7 +31,7 @@ class PinDetailViewController: UIViewController {
     // MARK: - Core Data convenience methods
     
     var sharedContext: NSManagedObjectContext {
-        return CoreDataStackManager.sharedInstance.managedObjectContext
+        return CoreDataStackManager.sharedInstance.context
     }
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
@@ -46,7 +46,7 @@ class PinDetailViewController: UIViewController {
     }()
     
     func saveContext() {
-        CoreDataStackManager.sharedInstance.saveContext()
+        CoreDataStackManager.sharedInstance.save()
     }
     
     
@@ -84,7 +84,7 @@ class PinDetailViewController: UIViewController {
             self.mapView.addAnnotation(self.annotation)
         }
         
-        if annotation.pin.photos.count == 0 {
+        if annotation.pin.photos!.count == 0 {
             getPhotos(forPin: annotation.pin)
         }
     }
@@ -98,8 +98,8 @@ class PinDetailViewController: UIViewController {
     // MARK: - Helpers
     
     func getPhotos(forPin pin: Pin) {
-        let lat = pin.latitude as Double
-        let lon = pin.longitude as Double
+        let lat = pin.latitude as! Double
+        let lon = pin.longitude as! Double
 
         FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
             print("\(#function)")
@@ -126,21 +126,22 @@ class PinDetailViewController: UIViewController {
                 
 //                print(photos)
                 let _ = photos.map() { (photo: [String: AnyObject]) -> Photo in
-                    let imageURL = NSURL(string: photo[FlickrClient.Photo.MediumURL] as! String)
+                    let imageURLString = photo[FlickrClient.Photo.MediumURL] as! String
+//                    let imageURL = NSURL(string: imageURLString)
 //                    print(imageURL)
-                    let imageData = NSData(contentsOfURL: imageURL!)
+//                    let imageData = NSData(contentsOfURL: imageURL!)
 //                    print(imageData)
-                    let photo = Photo(imageData: imageData!, context: self.sharedContext)
+                    let photo = Photo(imageURLString: imageURLString, context: self.sharedContext)
                     photo.pin = self.annotation.pin
                     
                     return photo
                 }
                 
+                self.saveContext()
+                
                 performUIUpdatesOnMain{
                     self.collectionView.reloadData()
                 }
-                
-                self.saveContext()
             }
         }
         
@@ -175,9 +176,14 @@ extension PinDetailViewController: UICollectionViewDataSource {
     
     func configureCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-        let imageData = photo.imageData
-        
-        cell.imageView.image = UIImage(data: imageData!)
+        if let imageData = photo.imageData {
+            performUIUpdatesOnMain{
+                cell.imageView.image = UIImage(data: imageData)
+            }
+        }
+        else {
+            print(photo.imageURLString)
+        }
     }
 }
 
