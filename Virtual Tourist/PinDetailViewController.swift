@@ -60,11 +60,12 @@ class PinDetailViewController: UIViewController {
                 
         do {
             try fetchedResultsController.performFetch()
-            print("perform fetch")
         }
         catch let error as NSError {
             print("Error performining initial fetch: \(error)")
         }
+        
+        fetchedResultsController.delegate = self
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -86,6 +87,7 @@ class PinDetailViewController: UIViewController {
         
         if annotation.pin.photos!.count == 0 {
             getPhotos(forPin: annotation.pin)
+            self.collectionView.reloadData()
         }
     }
 
@@ -124,13 +126,8 @@ class PinDetailViewController: UIViewController {
                     return
                 }
                 
-//                print(photos)
                 let _ = photos.map() { (photo: [String: AnyObject]) -> Photo in
                     let imageURLString = photo[FlickrClient.Photo.MediumURL] as! String
-//                    let imageURL = NSURL(string: imageURLString)
-//                    print(imageURL)
-//                    let imageData = NSData(contentsOfURL: imageURL!)
-//                    print(imageData)
                     let photo = Photo(imageURLString: imageURLString, context: self.sharedContext)
                     photo.pin = self.annotation.pin
                     
@@ -138,10 +135,6 @@ class PinDetailViewController: UIViewController {
                 }
                 
                 self.saveContext()
-                
-                performUIUpdatesOnMain{
-                    self.collectionView.reloadData()
-                }
             }
         }
         
@@ -182,7 +175,12 @@ extension PinDetailViewController: UICollectionViewDataSource {
             }
         }
         else {
-            print(photo.imageURLString)
+            cell.imageView.image = nil
+            let imageURL = NSURL(string: photo.imageURLString!)
+            CoreDataStackManager.sharedInstance.performBackgroundImportingBatchOperation() { (workerContext) in
+                let pendingImageData = NSData(contentsOfURL: imageURL!)
+                photo.imageData = pendingImageData
+            }
         }
     }
 }
