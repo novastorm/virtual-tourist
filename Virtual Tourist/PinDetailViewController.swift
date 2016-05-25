@@ -58,6 +58,10 @@ class PinDetailViewController: UIViewController {
     
     override func viewDidLoad() {
                 
+        if annotation.pin.photos!.count == 0 {
+            getPhotos(forPin: annotation.pin)
+        }
+
         do {
             try fetchedResultsController.performFetch()
         }
@@ -85,10 +89,9 @@ class PinDetailViewController: UIViewController {
             self.mapView.addAnnotation(self.annotation)
         }
         
-        if annotation.pin.photos!.count == 0 {
-            getPhotos(forPin: annotation.pin)
-            self.collectionView.reloadData()
-        }
+//        if annotation.pin.photos!.count == 0 {
+//            getPhotos(forPin: annotation.pin)
+//        }
     }
 
     // MARK: - Actions
@@ -135,6 +138,10 @@ class PinDetailViewController: UIViewController {
                 }
                 
                 self.saveContext()
+                
+//                performUIUpdatesOnMain{
+//                    self.collectionView.reloadData()
+//                }
             }
         }
         
@@ -180,6 +187,9 @@ extension PinDetailViewController: UICollectionViewDataSource {
             CoreDataStackManager.sharedInstance.performBackgroundImportingBatchOperation() { (workerContext) in
                 let pendingImageData = NSData(contentsOfURL: imageURL!)
                 photo.imageData = pendingImageData
+                performUIUpdatesOnMain{
+                    cell.imageView.image = UIImage(data: pendingImageData!)
+                }
             }
         }
     }
