@@ -87,7 +87,6 @@
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
-                                        <color key="backgroundColor" red="0.40830669953371479" green="1" blue="0.39673654649147561" alpha="1" colorSpace="calibratedRGB"/>
                                         <connections>
                                             <outlet property="imageView" destination="tYx-q3-gV7" id="euI-VY-eLV"/>
                                         </connections>

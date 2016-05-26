@@ -46,7 +46,6 @@ struct CoreDataStack {
         self.model = model
         
         
-        
         // Create the store coordinator
         coordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
         
@@ -76,7 +75,6 @@ struct CoreDataStack {
         
         self.dbURL = docUrl.URLByAppendingPathComponent("model.sqlite")
         
-        
         do{
             try addStoreTo(coordinator: coordinator,
                            storeType: NSSQLiteStoreType,
@@ -87,11 +85,6 @@ struct CoreDataStack {
         }catch{
             print("unable to add store at \(dbURL)")
         }
-        
-        
-        
-        
-        
     }
     
     // MARK:  - Utils
@@ -110,20 +103,17 @@ struct CoreDataStack {
 // MARK:  - Removing data
 extension CoreDataStack  {
     
-    func dropAllData() throws{
+    func dropAllData() throws {
         // delete all the objects in the db. This won't delete the files, it will
         // just leave empty tables.
         try coordinator.destroyPersistentStoreAtURL(dbURL, withType:NSSQLiteStoreType , options: nil)
         
         try addStoreTo(coordinator: self.coordinator, storeType: NSSQLiteStoreType, configuration: nil, storeURL: dbURL, options: nil)
-        
-        
     }
 }
 
 // MARK:  - Batch processing in the background
 extension CoreDataStack{
-    
     
     func performBackgroundBatchOperation(batch: BatchTask){
         
@@ -177,9 +167,6 @@ extension CoreDataStack {
                 object: nil)
             nc.postNotification(n)
         }
-        
-        
-        
     }
 }
 

@@ -107,7 +107,6 @@ class PinDetailViewController: UIViewController {
         let lon = pin.longitude as! Double
 
         FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
-            print("\(#function)")
             if let error = error {
                 print(error)
                 return
@@ -211,13 +210,9 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
         insertedIndexPaths = [NSIndexPath]()
         deletedIndexPaths = [NSIndexPath]()
         updatedIndexPaths = [NSIndexPath]()
-        
-        print("\(#function)")
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
-        
-        print("\(#function)")
         
         switch type {
         case .Insert:
@@ -237,7 +232,7 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
     }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        print("\(#function)")
+
         print("queued changes - Insert:\(insertedIndexPaths.count), Delete:\(deletedIndexPaths.count)")
         
         collectionView.performBatchUpdates( { () -> Void in
