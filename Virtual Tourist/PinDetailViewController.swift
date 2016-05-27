@@ -166,20 +166,13 @@ extension PinDetailViewController: UICollectionViewDataSource {
     
     func configureCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-        if let imageData = photo.imageData {
-            cell.activityIndicator.stopAnimating()
-            cell.imageView.image = UIImage(data: imageData)
-        }
-        else {
-            cell.imageView.image = nil
-            cell.activityIndicator.startAnimating()
-            cell.activityIndicator.hidden = false
-        }
+        
+        cell.configure(withPhoto: photo)
     }
 }
 
 
-// MARK: - Collection View Data Source
+// MARK: - Collection View Delegate
 
 extension PinDetailViewController: UICollectionViewDelegate {
     
@@ -200,16 +193,13 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
         
         switch type {
         case .Insert:
-            print("Insert")
             insertedIndexPaths.append(newIndexPath!)
         case .Delete:
-            print("Delete")
             deletedIndexPaths.append(indexPath!)
         case .Update:
-            print("Update")
             updatedIndexPaths.append(indexPath!)
 //        case .Move:
-//            print("Move")
+//            break
         default:
             break
         }

@@ -79,7 +79,7 @@ class TravelLocationsViewController: UIViewController {
     // MARK: - Actions
     
     @IBAction func handleLongPress(sender: UILongPressGestureRecognizer) {
-        print("\(#function)")
+
         switch sender.state {
         case .Began:
             addPin(at: sender.locationInView(mapView))
