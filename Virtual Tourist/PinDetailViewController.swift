@@ -88,10 +88,6 @@ class PinDetailViewController: UIViewController {
             self.mapView.removeAnnotations(self.mapView.annotations)
             self.mapView.addAnnotation(self.annotation)
         }
-        
-//        if annotation.pin.photos!.count == 0 {
-//            getPhotos(forPin: annotation.pin)
-//        }
     }
 
     // MARK: - Actions
@@ -137,13 +133,8 @@ class PinDetailViewController: UIViewController {
                 }
                 
                 self.saveContext()
-                
-//                performUIUpdatesOnMain{
-//                    self.collectionView.reloadData()
-//                }
             }
         }
-        
     }
 }
 
@@ -176,15 +167,13 @@ extension PinDetailViewController: UICollectionViewDataSource {
     func configureCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         if let imageData = photo.imageData {
-            performUIUpdatesOnMain{
-                cell.imageView.image = UIImage(data: imageData)
-            }
+            cell.activityIndicator.stopAnimating()
+            cell.imageView.image = UIImage(data: imageData)
         }
         else {
             cell.imageView.image = nil
-            CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
-                photo.getImageData()
-            }
+            cell.activityIndicator.startAnimating()
+            cell.activityIndicator.hidden = false
         }
     }
 }
@@ -234,6 +223,10 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
             
             for indexPath in self.insertedIndexPaths {
                 self.collectionView.insertItemsAtIndexPaths([indexPath])
+                CoreDataStackManager.sharedInstance.performBackgroundBatchOperation({ (workerContext) in
+                    let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+                    photo.getImageData()
+                })
             }
             
             for indexPath in self.deletedIndexPaths {
