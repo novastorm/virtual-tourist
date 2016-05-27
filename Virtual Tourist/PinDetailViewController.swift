@@ -176,6 +176,10 @@ extension PinDetailViewController: UICollectionViewDataSource {
 
 extension PinDetailViewController: UICollectionViewDelegate {
     
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+        sharedContext.deleteObject(photo)
+    }
 }
 
 
