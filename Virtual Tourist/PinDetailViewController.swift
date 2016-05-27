@@ -182,13 +182,8 @@ extension PinDetailViewController: UICollectionViewDataSource {
         }
         else {
             cell.imageView.image = nil
-            let imageURL = NSURL(string: photo.imageURLString!)
-            CoreDataStackManager.sharedInstance.performBackgroundImportingBatchOperation() { (workerContext) in
-                let pendingImageData = NSData(contentsOfURL: imageURL!)
-                photo.imageData = pendingImageData
-                performUIUpdatesOnMain{
-                    cell.imageView.image = UIImage(data: pendingImageData!)
-                }
+            CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
+                photo.getImageData()
             }
         }
     }

@@ -26,5 +26,8 @@ class Photo: NSManagedObject {
         self.imageURLString = imageURLString
     }
     
-    
+    func getImageData() {
+        let imageURL = NSURL(string: imageURLString!)
+        imageData = NSData(contentsOfURL: imageURL!)
+    }
 }
