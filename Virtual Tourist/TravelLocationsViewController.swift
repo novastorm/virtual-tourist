@@ -74,6 +74,18 @@ class TravelLocationsViewController: UIViewController {
         updateMapAnnotations()
         
     }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        navigationController?.navigationBarHidden = true
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        navigationController?.navigationBarHidden = false
+        
+        super.viewWillDisappear(animated)
+    }
 
     
     // MARK: - Actions
@@ -154,11 +166,12 @@ extension TravelLocationsViewController: MKMapViewDelegate {
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         mapView.deselectAnnotation(view.annotation, animated: true)
         
-        let PinDetailVC = storyboard?.instantiateViewControllerWithIdentifier("PinDetailViewController") as! PinDetailViewController
+        let pinDetailVC = storyboard?.instantiateViewControllerWithIdentifier("PinDetailViewController") as! PinDetailViewController
         
-        PinDetailVC.annotation = view.annotation as! PinAnnotation
+        pinDetailVC.annotation = view.annotation as! PinAnnotation
         
-        presentViewController(PinDetailVC, animated: true, completion: nil)
+//        presentViewController(PinDetailVC, animated: true, completion: nil)
+        navigationController!.pushViewController(pinDetailVC, animated: true)
     }
     
 }

@@ -13,15 +13,15 @@ class PinPhotoCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
-    func configure(withPhoto photo: Photo) {
-        guard let imageData = photo.imageData else {
-            showLoading()
-            return
-        }
-
-        showImage(imageData)
-
-    }
+//    func configure(withPhoto photo: Photo) {
+//        guard let imageData = photo.imageData else {
+//            showLoading()
+//            return
+//        }
+//
+//        showImage(imageData)
+//
+//    }
     
     func showImage(imageData: NSData) {
         activityIndicator.stopAnimating()

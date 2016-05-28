@@ -14,6 +14,7 @@ class PinDetailViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var reloadImagesButton: UIBarButtonItem!
     
     var annotation: PinAnnotation!
     
@@ -26,7 +27,7 @@ class PinDetailViewController: UIViewController {
     var insertedIndexPaths: [NSIndexPath]!
     var deletedIndexPaths: [NSIndexPath]!
     var updatedIndexPaths: [NSIndexPath]!
-
+    
     
     // MARK: - Core Data convenience methods
     
@@ -59,7 +60,8 @@ class PinDetailViewController: UIViewController {
     override func viewDidLoad() {
                 
         if annotation.pin.photos!.count == 0 {
-            getPhotos(forPin: annotation.pin)
+            reloadImagesButton.enabled = false
+            getPhotos()
         }
 
         do {
@@ -92,15 +94,16 @@ class PinDetailViewController: UIViewController {
 
     // MARK: - Actions
     
-    @IBAction func doneViewing(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func reloadImages(sender: AnyObject) {
+        clearPhotos()
+        getPhotos()
     }
     
     // MARK: - Helpers
     
-    func getPhotos(forPin pin: Pin) {
-        let lat = pin.latitude as! Double
-        let lon = pin.longitude as! Double
+    func getPhotos() {
+        let lat = annotation.pin.latitude as! Double
+        let lon = annotation.pin.longitude as! Double
 
         FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
             if let error = error {
@@ -136,6 +139,15 @@ class PinDetailViewController: UIViewController {
             }
         }
     }
+    
+    func clearPhotos() {
+        CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
+            for object in self.fetchedResultsController.fetchedObjects! {
+                self.sharedContext.deleteObject(object as! NSManagedObject)
+            }
+        }
+        reloadImagesButton.enabled = false
+    }
 }
 
 
@@ -167,7 +179,21 @@ extension PinDetailViewController: UICollectionViewDataSource {
     func configureCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         
-        cell.configure(withPhoto: photo)
+//        cell.configure(withPhoto: photo)
+        guard photo.imageData != nil else {
+            cell.showLoading()
+            CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
+                photo.getImageData()
+                if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
+                    performUIUpdatesOnMain {
+                        cellToUpdate.showImage(photo.imageData!)
+                    }
+                }
+            }
+            return
+        }
+        
+        cell.showImage(photo.imageData!)
     }
 }
 
@@ -211,16 +237,17 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
 
-        print("queued changes - Insert:\(insertedIndexPaths.count), Delete:\(deletedIndexPaths.count)")
+//        print("queued changes - Insert:\(insertedIndexPaths.count), Delete:\(deletedIndexPaths.count)")
         
         collectionView.performBatchUpdates( { () -> Void in
             
             for indexPath in self.insertedIndexPaths {
                 self.collectionView.insertItemsAtIndexPaths([indexPath])
-                CoreDataStackManager.sharedInstance.performBackgroundBatchOperation({ (workerContext) in
-                    let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-                    photo.getImageData()
-                })
+                // add
+//                CoreDataStackManager.sharedInstance.performBackgroundBatchOperation({ (workerContext) in
+//                    let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+//                    photo.getImageData()
+//                })
             }
             
             for indexPath in self.deletedIndexPaths {
