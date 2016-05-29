@@ -117,7 +117,7 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="HP5-1f-Y5W">
-                        <barButtonItem key="rightBarButtonItem" title="Reload Images" id="LJd-zJ-wA3">
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" title="Reload Images" id="LJd-zJ-wA3">
                             <connections>
                                 <action selector="reloadImages:" destination="6aF-Ge-WgX" id="jbE-bX-bqL"/>
                             </connections>

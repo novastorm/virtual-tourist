@@ -58,11 +58,6 @@ class PinDetailViewController: UIViewController {
     }
     
     override func viewDidLoad() {
-                
-        if annotation.pin.photos!.count == 0 {
-            reloadImagesButton.enabled = false
-            getPhotos()
-        }
 
         do {
             try fetchedResultsController.performFetch()
@@ -72,6 +67,10 @@ class PinDetailViewController: UIViewController {
         }
         
         fetchedResultsController.delegate = self
+        
+        if annotation.pin.photos!.count == 0 {
+            getPhotos()
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -89,6 +88,7 @@ class PinDetailViewController: UIViewController {
         performUIUpdatesOnMain {
             self.mapView.removeAnnotations(self.mapView.annotations)
             self.mapView.addAnnotation(self.annotation)
+            self.reloadImagesButton.enabled = self.isPhotoDownloadComplete()
         }
     }
 
@@ -100,6 +100,18 @@ class PinDetailViewController: UIViewController {
     }
     
     // MARK: - Helpers
+    
+    func isPhotoDownloadComplete() -> Bool {
+        var count = 0
+        
+        for photo in fetchedResultsController.fetchedObjects as! [Photo] {
+            if photo.imageData == nil {
+                count += 1
+            }
+        }
+        
+        return annotation.pin.photos?.count > 0 && count == 0
+    }
     
     func getPhotos() {
         let lat = annotation.pin.latitude as! Double
@@ -179,7 +191,6 @@ extension PinDetailViewController: UICollectionViewDataSource {
     func configureCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         
-//        cell.configure(withPhoto: photo)
         guard photo.imageData != nil else {
             cell.showLoading()
             CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
@@ -237,17 +248,10 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
 
-//        print("queued changes - Insert:\(insertedIndexPaths.count), Delete:\(deletedIndexPaths.count)")
-        
         collectionView.performBatchUpdates( { () -> Void in
             
             for indexPath in self.insertedIndexPaths {
                 self.collectionView.insertItemsAtIndexPaths([indexPath])
-                // add
-//                CoreDataStackManager.sharedInstance.performBackgroundBatchOperation({ (workerContext) in
-//                    let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-//                    photo.getImageData()
-//                })
             }
             
             for indexPath in self.deletedIndexPaths {
@@ -258,5 +262,7 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
                 self.collectionView.reloadItemsAtIndexPaths([indexPath])
             }
         }, completion: nil)
+        
+        self.reloadImagesButton.enabled = self.isPhotoDownloadComplete()
     }
 }
