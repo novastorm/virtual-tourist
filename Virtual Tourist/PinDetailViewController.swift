@@ -16,6 +16,9 @@ class PinDetailViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var reloadImagesButton: UIBarButtonItem!
     
+    let reloadImagesButtonTitleDefault = "Reload Images"
+    let reloadImagesButtonTitleDownloading = "Downloading (100)"
+    
     var annotation: PinAnnotation!
     
     // The selected indexes array keeps all of the indexPaths for cells that are "selected". The array is
@@ -58,6 +61,12 @@ class PinDetailViewController: UIViewController {
     }
     
     override func viewDidLoad() {
+        reloadImagesButton.possibleTitles = [
+            reloadImagesButtonTitleDefault,
+            reloadImagesButtonTitleDownloading
+            ]
+        reloadImagesButton.title = reloadImagesButtonTitleDefault
+        reloadImagesButton.enabled = false
 
         do {
             try fetchedResultsController.performFetch()
@@ -88,12 +97,14 @@ class PinDetailViewController: UIViewController {
         self.mapView.removeAnnotations(self.mapView.annotations)
         self.mapView.addAnnotation(self.annotation)
 
-        self.reloadImagesButton.enabled = self.getPhotoDownloadStatus().completed
+        let (state, remaining) = getPhotoDownloadStatus()
+        enableReloadImagesButton(state, remaining: remaining)
     }
 
     // MARK: - Actions
     
     @IBAction func reloadImages(sender: AnyObject) {
+        reloadImagesButton.enabled = false
         clearPhotos()
         getPhotos()
     }
@@ -163,11 +174,21 @@ class PinDetailViewController: UIViewController {
     }
     
     func clearPhotos() {
-        
-        reloadImagesButton.enabled = false
-        
         for object in fetchedResultsController.fetchedObjects! {
             sharedContext.deleteObject(object as! NSManagedObject)
+        }
+    }
+    
+    func enableReloadImagesButton(state: Bool, remaining count: Int = 0) {
+        performUIUpdatesOnMain { 
+            if !state {
+                self.reloadImagesButton.title = "Downloading (\(count))"
+            }
+            else {
+                self.reloadImagesButton.title = self.reloadImagesButtonTitleDefault
+            }
+            
+            self.reloadImagesButton.enabled = state
         }
     }
 }
@@ -278,6 +299,7 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
             }
         )
         
-        self.reloadImagesButton.enabled = self.getPhotoDownloadStatus().completed
+        let (state, remaining) = getPhotoDownloadStatus()
+        enableReloadImagesButton(state, remaining: remaining)
     }
 }
