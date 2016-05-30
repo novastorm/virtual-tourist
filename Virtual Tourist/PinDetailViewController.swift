@@ -85,11 +85,10 @@ class PinDetailViewController: UIViewController {
 
         mapView.setRegion(region, animated: true)
 
-        performUIUpdatesOnMain {
-            self.mapView.removeAnnotations(self.mapView.annotations)
-            self.mapView.addAnnotation(self.annotation)
-            self.reloadImagesButton.enabled = self.isPhotoDownloadComplete()
-        }
+        self.mapView.removeAnnotations(self.mapView.annotations)
+        self.mapView.addAnnotation(self.annotation)
+
+        self.reloadImagesButton.enabled = self.isPhotoDownloadComplete()
     }
 
     // MARK: - Actions
@@ -152,13 +151,24 @@ class PinDetailViewController: UIViewController {
         }
     }
     
-    func clearPhotos() {
+    func downloadAnImage() {
         CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
-            for object in self.fetchedResultsController.fetchedObjects! {
-                self.sharedContext.deleteObject(object as! NSManagedObject)
+            for photo in self.fetchedResultsController.fetchedObjects as! [Photo] {
+                if photo.imageData == nil {
+                    photo.getImageData()
+                    break
+                }
             }
         }
+    }
+    
+    func clearPhotos() {
+        
         reloadImagesButton.enabled = false
+        
+        for object in fetchedResultsController.fetchedObjects! {
+            sharedContext.deleteObject(object as! NSManagedObject)
+        }
     }
 }
 
@@ -239,8 +249,8 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
             deletedIndexPaths.append(indexPath!)
         case .Update:
             updatedIndexPaths.append(indexPath!)
-//        case .Move:
-//            break
+        case .Move:
+            fallthrough
         default:
             break
         }
@@ -261,7 +271,12 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
             for indexPath in self.updatedIndexPaths {
                 self.collectionView.reloadItemsAtIndexPaths([indexPath])
             }
-        }, completion: nil)
+            }, completion: { (success) in
+                if !self.isPhotoDownloadComplete() {
+                    self.downloadAnImage()
+                }
+            }
+        )
         
         self.reloadImagesButton.enabled = self.isPhotoDownloadComplete()
     }
