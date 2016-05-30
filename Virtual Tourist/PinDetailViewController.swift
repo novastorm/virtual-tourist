@@ -88,7 +88,7 @@ class PinDetailViewController: UIViewController {
         self.mapView.removeAnnotations(self.mapView.annotations)
         self.mapView.addAnnotation(self.annotation)
 
-        self.reloadImagesButton.enabled = self.isPhotoDownloadComplete()
+        self.reloadImagesButton.enabled = self.getPhotoDownloadStatus().completed
     }
 
     // MARK: - Actions
@@ -100,7 +100,7 @@ class PinDetailViewController: UIViewController {
     
     // MARK: - Helpers
     
-    func isPhotoDownloadComplete() -> Bool {
+    func getPhotoDownloadStatus() -> (completed: Bool, remaining: Int) {
         var count = 0
         
         for photo in fetchedResultsController.fetchedObjects as! [Photo] {
@@ -109,7 +109,7 @@ class PinDetailViewController: UIViewController {
             }
         }
         
-        return annotation.pin.photos?.count > 0 && count == 0
+        return (annotation.pin.photos?.count > 0 && count == 0, count)
     }
     
     func getPhotos() {
@@ -272,12 +272,12 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
                 self.collectionView.reloadItemsAtIndexPaths([indexPath])
             }
             }, completion: { (success) in
-                if !self.isPhotoDownloadComplete() {
+                if !self.getPhotoDownloadStatus().completed {
                     self.downloadAnImage()
                 }
             }
         )
         
-        self.reloadImagesButton.enabled = self.isPhotoDownloadComplete()
+        self.reloadImagesButton.enabled = self.getPhotoDownloadStatus().completed
     }
 }
