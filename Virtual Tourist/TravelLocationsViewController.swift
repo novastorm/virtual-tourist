@@ -170,7 +170,6 @@ extension TravelLocationsViewController: MKMapViewDelegate {
         
         pinDetailVC.annotation = view.annotation as! PinAnnotation
         
-//        presentViewController(PinDetailVC, animated: true, completion: nil)
         navigationController!.pushViewController(pinDetailVC, animated: true)
     }
     
