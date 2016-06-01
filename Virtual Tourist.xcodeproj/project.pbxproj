@@ -89,6 +89,8 @@
 		3E1971BB1CE3FF81004FC65E /* Virtual Tourist */ = {
 			isa = PBXGroup;
 			children = (
+				3E1971C81CE3FF81004FC65E /* LaunchScreen.storyboard */,
+				3E1971C01CE3FF81004FC65E /* Main.storyboard */,
 				3E1971BE1CE3FF81004FC65E /* TravelLocationsViewController.swift */,
 				3E6A3E841CECEFC400346705 /* PinDetailViewController.swift */,
 				3E6A3E9B1CEFEE3200346705 /* PinPhotoCollectionViewCell.swift */,
@@ -100,9 +102,7 @@
 				3E1971D11CE54BD3004FC65E /* Utilites.swift */,
 				3E1971D31CE54C3A004FC65E /* GCDUtilities.swift */,
 				3E6A3E8C1CED731200346705 /* ErrorCodes.swift */,
-				3E1971C01CE3FF81004FC65E /* Main.storyboard */,
 				3E1971C61CE3FF81004FC65E /* Assets.xcassets */,
-				3E1971C81CE3FF81004FC65E /* LaunchScreen.storyboard */,
 				3E1971CB1CE3FF81004FC65E /* Info.plist */,
 				3E1971C31CE3FF81004FC65E /* Virtual_Tourist.xcdatamodeld */,
 			);
