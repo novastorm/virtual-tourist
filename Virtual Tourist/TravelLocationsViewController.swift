@@ -6,14 +6,41 @@
 //  Copyright © 2016 Adland Lee. All rights reserved.
 //
 
-import UIKit
+import CoreData
 import MapKit
+import UIKit
 
 
 class TravelLocationsViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet var longPressGestureRecognizer: UILongPressGestureRecognizer!
+    
+    
+    // MARK: - Core Data convenience methods
+    
+    var sharedContext: NSManagedObjectContext {
+        return CoreDataStackManager.sharedInstance.context
+    }
+    
+    lazy var fetchedResultsController: NSFetchedResultsController = {
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        fetchRequest.sortDescriptors = []
+        
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        return fetchedResultsController
+    }()
+    
+    func saveContext() {
+        CoreDataStackManager.sharedInstance.save()
+    }
+    
+    // MARK: - View Cycle
+    
+    override func prefersStatusBarHidden() -> Bool {
+        return true
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,39 +54,101 @@ class TravelLocationsViewController: UIViewController {
                 savedRegion["longitude"] as! Double
                 ),
             span: MKCoordinateSpan(
-                latitudeDelta: savedRegion["latitudeDelta"] as! Double,
+                 latitudeDelta: savedRegion["latitudeDelta"] as! Double,
                 longitudeDelta: savedRegion["longitudeDelta"] as! Double
                 )
             )
         
-        mapView.setRegion(region, animated: true)
+        mapView.setRegion(region, animated: false)
+        mapView.setCenterCoordinate(region.center, animated: true)
         mapView.delegate = self
+        
+        fetchedResultsController.delegate = self
+
+        do {
+            try fetchedResultsController.performFetch()
+        }
+        catch {
+            abort()
+        }
+        updateMapAnnotations()
+        
     }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        navigationController?.navigationBarHidden = true
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        navigationController?.navigationBarHidden = false
+        
+        super.viewWillDisappear(animated)
+    }
+
+    
+    // MARK: - Actions
     
     @IBAction func handleLongPress(sender: UILongPressGestureRecognizer) {
-        print("\(#function)")
-        guard sender.state == .Began else {
-            return
+
+        switch sender.state {
+        case .Began:
+            addPin(at: sender.locationInView(mapView))
+            // refactor to setup pin and draggable
+            break
+        case .Changed:
+            // have pin track user touch location
+            break
+        case .Ended:
+            // drop pin at last touchpoint
+            break
+        default:
+            break
         }
-        
-        dropPin(at: sender.locationInView(mapView))
     }
     
-    func dropPin(at touchPoint: CGPoint) {
-        print("\(#function)")
+    
+    // MARK: - Helpers
+    
+    func updateMapAnnotations() {
+        let pins = fetchedResultsController.fetchedObjects as! [Pin]
+        var annotations = [MKAnnotation]()
+        
+        for pin in pins {
+            let annotation = PinAnnotation(withPin: pin)
+            
+            annotations.append(annotation)
+        }
+        
+        performUIUpdatesOnMain {
+            self.mapView.removeAnnotations(self.mapView.annotations)
+            self.mapView.addAnnotations(annotations)
+        }
+    }
+    
+    func addPin(at touchPoint: CGPoint) {
         
         let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = mapCoordinate
+//        let annotation = MKPointAnnotation()
+//        annotation.coordinate = mapCoordinate
         
+        let pin = Pin(
+            lat: mapCoordinate.latitude,
+            lon: mapCoordinate.longitude,
+            context: sharedContext)
+        
+        saveContext()
+        
+        let annotation = PinAnnotation(withPin: pin)
         mapView.addAnnotation(annotation)
     }
     
     func saveMapViewRegion(region: MKCoordinateRegion) {
         NSUserDefaults.standardUserDefaults().setObject([
-            "latitude": region.center.latitude,
-            "longitude": region.center.longitude,
-            "latitudeDelta": region.span.latitudeDelta,
+                  "latitude": region.center.latitude,
+                 "longitude": region.center.longitude,
+             "latitudeDelta": region.span.latitudeDelta,
             "longitudeDelta": region.span.longitudeDelta
             ], forKey: AppDelegate.UserDefaultKeys.MapViewRegion)
     }
@@ -75,7 +164,21 @@ extension TravelLocationsViewController: MKMapViewDelegate {
     }
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
-        print("\(#function)")
+        mapView.deselectAnnotation(view.annotation, animated: true)
+        
+        let pinDetailVC = storyboard?.instantiateViewControllerWithIdentifier("PinDetailViewController") as! PinDetailViewController
+        
+        pinDetailVC.annotation = view.annotation as! PinAnnotation
+        
+//        presentViewController(PinDetailVC, animated: true, completion: nil)
+        navigationController!.pushViewController(pinDetailVC, animated: true)
     }
     
+}
+
+extension TravelLocationsViewController: NSFetchedResultsControllerDelegate {
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        updateMapAnnotations()
+    }
 }

@@ -15,9 +15,10 @@ class Pin: NSManagedObject {
     struct Keys {
         static let Latitude = "latitude"
         static let Longitude = "longitude"
+        static let Photos = "photos"
     }
     
-    convenience init(lat: Float, lon: Float, context: NSManagedObjectContext) {
+    convenience init(lat: Double, lon: Double, context: NSManagedObjectContext) {
         let entity = NSEntityDescription.entityForName("Pin", inManagedObjectContext: context)!
         
         self.init(entity: entity, insertIntoManagedObjectContext: context)
