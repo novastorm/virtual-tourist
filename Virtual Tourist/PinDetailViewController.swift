@@ -35,7 +35,7 @@ class PinDetailViewController: UIViewController {
     
     // MARK: - Core Data convenience methods
     
-    var sharedContext: NSManagedObjectContext {
+    var sharedMainContext: NSManagedObjectContext {
         return CoreDataStackManager.sharedInstance.context
     }
     
@@ -45,7 +45,7 @@ class PinDetailViewController: UIViewController {
         fetchRequest.sortDescriptors = []
         fetchRequest.predicate = NSPredicate(format: "pin = %@", self.annotation.pin)
         
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedMainContext, sectionNameKeyPath: nil, cacheName: nil)
         
         return fetchedResultsController
     }()
@@ -150,10 +150,10 @@ class PinDetailViewController: UIViewController {
                     return
                 }
                 
-                for record in photoResults {
-                    let imageURLString = record[FlickrClient.Photo.MediumURL] as! String
-                    let photo = Photo(imageURLString: imageURLString, context: self.sharedContext)
-                    self.sharedContext.performBlock {
+                self.sharedMainContext.performBlockAndWait {
+                    for record in photoResults {
+                        let imageURLString = record[FlickrClient.Photo.MediumURL] as! String
+                        let photo = Photo(imageURLString: imageURLString, context: self.sharedMainContext)
                         photo.pin = self.annotation.pin
                     }
                 }
@@ -175,7 +175,7 @@ class PinDetailViewController: UIViewController {
     
     func clearPhotos() {
         for object in fetchedResultsController.fetchedObjects! {
-            sharedContext.deleteObject(object as! NSManagedObject)
+            sharedMainContext.deleteObject(object as! NSManagedObject)
         }
     }
     
@@ -224,11 +224,14 @@ extension PinDetailViewController: UICollectionViewDataSource {
         
         guard photo.imageData != nil else {
             cell.showLoading()
-            photo.getImageData()
-            if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
-                performUIUpdatesOnMain {
-                    cellToUpdate.showImage(photo.imageData!)
+            sharedMainContext.performBlock {
+                photo.getImageData()
+                if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
+                    performUIUpdatesOnMain {
+                        cellToUpdate.showImage(photo.imageData!)
+                    }
                 }
+                self.saveContext()
             }
             return
         }
@@ -245,7 +248,7 @@ extension PinDetailViewController: UICollectionViewDelegate {
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         if getPhotoDownloadStatus().completed {
-            sharedContext.deleteObject(photo)
+            sharedMainContext.deleteObject(photo)
         }
     }
 }

@@ -19,15 +19,19 @@ class TravelLocationsViewController: UIViewController {
     
     // MARK: - Core Data convenience methods
     
-    var sharedContext: NSManagedObjectContext {
+    var sharedMainContext: NSManagedObjectContext {
         return CoreDataStackManager.sharedInstance.context
+    }
+    
+    var sharedBackgroundContext: NSManagedObjectContext {
+        return CoreDataStackManager.sharedInstance.backgroundContext
     }
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: "Pin")
         fetchRequest.sortDescriptors = []
         
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedBackgroundContext, sectionNameKeyPath: nil, cacheName: nil)
         
         return fetchedResultsController
     }()
@@ -112,18 +116,20 @@ class TravelLocationsViewController: UIViewController {
     // MARK: - Helpers
     
     func updateMapAnnotations() {
-        let pins = fetchedResultsController.fetchedObjects as! [Pin]
-        var annotations = [MKAnnotation]()
-        
-        for pin in pins {
-            let annotation = PinAnnotation(withPin: pin)
+        sharedBackgroundContext.performBlock { 
+            let pins = self.fetchedResultsController.fetchedObjects as! [Pin]
+            var annotations = [MKAnnotation]()
             
-            annotations.append(annotation)
-        }
-        
-        performUIUpdatesOnMain {
-            self.mapView.removeAnnotations(self.mapView.annotations)
-            self.mapView.addAnnotations(annotations)
+            for pin in pins {
+                let annotation = PinAnnotation(withPin: pin)
+                
+                annotations.append(annotation)
+            }
+            
+            performUIUpdatesOnMain {
+                self.mapView.removeAnnotations(self.mapView.annotations)
+                self.mapView.addAnnotations(annotations)
+            }
         }
     }
     
@@ -131,12 +137,21 @@ class TravelLocationsViewController: UIViewController {
         
         let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
 
-        let pin = Pin(
-            lat: mapCoordinate.latitude,
-            lon: mapCoordinate.longitude,
-            context: sharedContext)
+//        let pin = Pin(
+//            lat: mapCoordinate.latitude,
+//            lon: mapCoordinate.longitude,
+//            context: self.sharedBackgroundContext)
         
-        saveContext()
+        let entity = NSEntityDescription.entityForName("Pin", inManagedObjectContext: self.sharedBackgroundContext)!
+        var pin: Pin!
+            
+        sharedBackgroundContext.performBlockAndWait {
+            pin = Pin(entity: entity, insertIntoManagedObjectContext: self.sharedBackgroundContext)
+            pin.latitude = mapCoordinate.latitude
+            pin.longitude = mapCoordinate.longitude
+            try! self.sharedBackgroundContext.save()
+        }
+
         
         let annotation = PinAnnotation(withPin: pin)
         mapView.addAnnotation(annotation)

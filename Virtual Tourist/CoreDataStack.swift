@@ -24,7 +24,7 @@ struct CoreDataStack {
     private let modelURL : NSURL
     private let dbURL : NSURL
     private let persistingContext : NSManagedObjectContext
-    private let backgroundContext : NSManagedObjectContext
+    let backgroundContext : NSManagedObjectContext
     let context : NSManagedObjectContext
     
     
@@ -115,7 +115,7 @@ extension CoreDataStack  {
 // MARK:  - Batch processing in the background
 extension CoreDataStack{
     
-    func performBackgroundBatchOperation(batch: BatchTask){
+    func performBackgroundBatchOperation(batch: BatchTask) {
         
         backgroundContext.performBlockAndWait(){
             batch(workerContext: self.backgroundContext)
@@ -130,7 +130,7 @@ extension CoreDataStack{
         }
     }
     
-    func performAsyncBackgroundBatchOperation(batch: BatchTask){
+    func performAsyncBackgroundBatchOperation(batch: BatchTask) {
         
         backgroundContext.performBlock(){
             batch(workerContext: self.backgroundContext)
