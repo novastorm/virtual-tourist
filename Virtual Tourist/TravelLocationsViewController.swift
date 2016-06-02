@@ -130,9 +130,7 @@ class TravelLocationsViewController: UIViewController {
     func addPin(at touchPoint: CGPoint) {
         
         let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
-//        let annotation = MKPointAnnotation()
-//        annotation.coordinate = mapCoordinate
-        
+
         let pin = Pin(
             lat: mapCoordinate.latitude,
             lon: mapCoordinate.longitude,

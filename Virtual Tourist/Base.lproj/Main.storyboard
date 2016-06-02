@@ -117,16 +117,16 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="HP5-1f-Y5W">
-                        <barButtonItem key="rightBarButtonItem" enabled="NO" title="Reload Images" id="LJd-zJ-wA3">
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" title="New Collection" id="LJd-zJ-wA3">
                             <connections>
-                                <action selector="reloadImages:" destination="6aF-Ge-WgX" id="jbE-bX-bqL"/>
+                                <action selector="getNewCollection:" destination="6aF-Ge-WgX" id="9mj-KZ-ZRH"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="collectionView" destination="1hz-ea-onK" id="1OV-9H-P63"/>
                         <outlet property="mapView" destination="zXy-Ee-Atx" id="xPn-sv-OoO"/>
-                        <outlet property="reloadImagesButton" destination="LJd-zJ-wA3" id="732-Vx-TfG"/>
+                        <outlet property="newCollectionButton" destination="LJd-zJ-wA3" id="ff9-cE-yN6"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cSk-p7-tCx" userLabel="First Responder" sceneMemberID="firstResponder"/>

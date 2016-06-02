@@ -14,10 +14,11 @@ class PinDetailViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var reloadImagesButton: UIBarButtonItem!
+    @IBOutlet weak var newCollectionButton: UIBarButtonItem!
     
-    let reloadImagesButtonTitleDefault = "Reload Images"
-    let reloadImagesButtonTitleDownloading = "Downloading (100)"
+    let newCollectionButtonTitleDefault = "New Collection"
+    let newCollectionButtonTitleDownloading = "Downloading (25)"
+    let viewScaleRadiusKm = 50
     
     var annotation: PinAnnotation!
     
@@ -61,12 +62,12 @@ class PinDetailViewController: UIViewController {
     }
     
     override func viewDidLoad() {
-        reloadImagesButton.possibleTitles = [
-            reloadImagesButtonTitleDefault,
-            reloadImagesButtonTitleDownloading
+        newCollectionButton.possibleTitles = [
+            newCollectionButtonTitleDefault,
+            newCollectionButtonTitleDownloading
             ]
-        reloadImagesButton.title = reloadImagesButtonTitleDefault
-        reloadImagesButton.enabled = false
+        newCollectionButton.title = newCollectionButtonTitleDefault
+        newCollectionButton.enabled = false
 
         do {
             try fetchedResultsController.performFetch()
@@ -87,7 +88,7 @@ class PinDetailViewController: UIViewController {
         
         let lat = annotation.coordinate.latitude
         let lon = annotation.coordinate.longitude
-        let radius = 100.0
+        let radius = distanceInMeters(kilometers: Double(viewScaleRadiusKm))
         
         let coordinate = CLLocationCoordinate2DMake(lat, lon)
         let region = MKCoordinateRegionMakeWithDistance(coordinate, radius, radius)
@@ -98,13 +99,13 @@ class PinDetailViewController: UIViewController {
         self.mapView.addAnnotation(self.annotation)
 
         let (state, remaining) = getPhotoDownloadStatus()
-        enableReloadImagesButton(state, remaining: remaining)
+        enableNewCollectionButton(state, remaining: remaining)
     }
 
     // MARK: - Actions
     
-    @IBAction func reloadImages(sender: AnyObject) {
-        reloadImagesButton.enabled = false
+    @IBAction func getNewCollection(sender: AnyObject) {
+        newCollectionButton.enabled = false
         clearPhotos()
         getPhotos()
     }
@@ -144,19 +145,18 @@ class PinDetailViewController: UIViewController {
                     return
                 }
                 
-                guard let photos = results?[FlickrClient.ResponseKeys.Photos]??[FlickrClient.Photos.Photo] as? [[String:AnyObject]] else {
+                guard let photoResults = results?[FlickrClient.ResponseKeys.Photos]??[FlickrClient.Photos.Photo] as? [[String:AnyObject]] else {
                     print("Cannot find photo list in Photos object")
                     return
                 }
                 
-                let _ = photos.map() { (photo: [String: AnyObject]) -> Photo in
-                    let imageURLString = photo[FlickrClient.Photo.MediumURL] as! String
+                for record in photoResults {
+                    let imageURLString = record[FlickrClient.Photo.MediumURL] as! String
                     let photo = Photo(imageURLString: imageURLString, context: self.sharedContext)
-                    photo.pin = self.annotation.pin
-                    
-                    return photo
+                    self.sharedContext.performBlock {
+                        photo.pin = self.annotation.pin
+                    }
                 }
-                
                 self.saveContext()
             }
         }
@@ -179,16 +179,16 @@ class PinDetailViewController: UIViewController {
         }
     }
     
-    func enableReloadImagesButton(state: Bool, remaining count: Int = 0) {
+    func enableNewCollectionButton(state: Bool, remaining count: Int = 0) {
         performUIUpdatesOnMain { 
             if !state {
-                self.reloadImagesButton.title = "Downloading (\(count))"
+                self.newCollectionButton.title = "Downloading (\(count))"
             }
             else {
-                self.reloadImagesButton.title = self.reloadImagesButtonTitleDefault
+                self.newCollectionButton.title = self.newCollectionButtonTitleDefault
             }
             
-            self.reloadImagesButton.enabled = state
+            self.newCollectionButton.enabled = state
         }
     }
 }
@@ -224,12 +224,10 @@ extension PinDetailViewController: UICollectionViewDataSource {
         
         guard photo.imageData != nil else {
             cell.showLoading()
-            CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
-                photo.getImageData()
-                if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
-                    performUIUpdatesOnMain {
-                        cellToUpdate.showImage(photo.imageData!)
-                    }
+            photo.getImageData()
+            if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
+                performUIUpdatesOnMain {
+                    cellToUpdate.showImage(photo.imageData!)
                 }
             }
             return
@@ -302,6 +300,6 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
         )
         
         let (state, remaining) = getPhotoDownloadStatus()
-        enableReloadImagesButton(state, remaining: remaining)
+        enableNewCollectionButton(state, remaining: remaining)
     }
 }
