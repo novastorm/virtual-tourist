@@ -36,7 +36,11 @@ class PinDetailViewController: UIViewController {
     // MARK: - Core Data convenience methods
     
     var sharedMainContext: NSManagedObjectContext {
-        return CoreDataStackManager.sharedInstance.context
+        return CoreDataStackManager.sharedInstance.mainContext
+    }
+    
+    var sharedBackgroundContext: NSManagedObjectContext {
+        return CoreDataStackManager.sharedInstance.backgroundContext
     }
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
@@ -45,13 +49,17 @@ class PinDetailViewController: UIViewController {
         fetchRequest.sortDescriptors = []
         fetchRequest.predicate = NSPredicate(format: "pin = %@", self.annotation.pin)
         
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedMainContext, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedBackgroundContext, sectionNameKeyPath: nil, cacheName: nil)
         
         return fetchedResultsController
     }()
     
     func saveContext() {
-        CoreDataStackManager.sharedInstance.save()
+        CoreDataStackManager.sharedInstance.saveMainContext()
+    }
+    
+    func saveTempContext(context: NSManagedObjectContext) {
+        CoreDataStackManager.sharedInstance.saveTempContext(context)
     }
     
     
@@ -78,8 +86,14 @@ class PinDetailViewController: UIViewController {
         
         fetchedResultsController.delegate = self
         
-        if annotation.pin.photos!.count == 0 {
-            getPhotos()
+        var numberOfPhotos = 0
+        
+        sharedBackgroundContext.performBlockAndWait {
+            numberOfPhotos = self.annotation.pin.photos!.count
+        }
+        
+        if numberOfPhotos == 0 {
+            self.getPhotos()
         }
     }
     
@@ -113,20 +127,29 @@ class PinDetailViewController: UIViewController {
     // MARK: - Helpers
     
     func getPhotoDownloadStatus() -> (completed: Bool, remaining: Int) {
-        var count = 0
+        var numberOfPhotos = 0
+        var numberOfPendingPhotos = 0
         
-        for photo in fetchedResultsController.fetchedObjects as! [Photo] {
-            if photo.imageData == nil {
-                count += 1
+        sharedBackgroundContext.performBlockAndWait {
+            numberOfPhotos = (self.annotation.pin.photos?.count)!
+            for photo in self.fetchedResultsController.fetchedObjects as! [Photo] {
+                if photo.imageData == nil {
+                    numberOfPendingPhotos += 1
+                }
             }
         }
         
-        return (annotation.pin.photos?.count > 0 && count == 0, count)
+        return (numberOfPhotos > 0 && numberOfPendingPhotos == 0, numberOfPendingPhotos)
     }
     
     func getPhotos() {
-        let lat = annotation.pin.latitude as! Double
-        let lon = annotation.pin.longitude as! Double
+        var lat: Double!
+        var lon: Double!
+        
+        sharedBackgroundContext.performBlockAndWait {
+            lat = self.annotation.pin.latitude as! Double
+            lon = self.annotation.pin.longitude as! Double
+        }
 
         FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
             if let error = error {
@@ -150,13 +173,15 @@ class PinDetailViewController: UIViewController {
                     return
                 }
                 
-                self.sharedMainContext.performBlockAndWait {
+                self.sharedBackgroundContext.performBlockAndWait {
                     for record in photoResults {
                         let imageURLString = record[FlickrClient.Photo.MediumURL] as! String
-                        let photo = Photo(imageURLString: imageURLString, context: self.sharedMainContext)
+                        let photo = Photo(imageURLString: imageURLString, context: self.sharedBackgroundContext)
                         photo.pin = self.annotation.pin
                     }
+                    try! self.sharedBackgroundContext.save()
                 }
+                
                 self.saveContext()
             }
         }
@@ -174,9 +199,12 @@ class PinDetailViewController: UIViewController {
     }
     
     func clearPhotos() {
-        for object in fetchedResultsController.fetchedObjects! {
-            sharedMainContext.deleteObject(object as! NSManagedObject)
+        sharedBackgroundContext.performBlockAndWait {
+            for object in self.fetchedResultsController.fetchedObjects! {
+                self.sharedBackgroundContext.deleteObject(object as! NSManagedObject)
+            }
         }
+        CoreDataStackManager.sharedInstance.saveTempContext(sharedBackgroundContext)
     }
     
     func enableNewCollectionButton(state: Bool, remaining count: Int = 0) {
@@ -221,22 +249,32 @@ extension PinDetailViewController: UICollectionViewDataSource {
     
     func configureCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+        var imageData: NSData!
         
-        guard photo.imageData != nil else {
+        sharedBackgroundContext.performBlockAndWait { 
+            imageData = photo.imageData
+        }
+        
+        guard (imageData != nil) else {
             cell.showLoading()
-            sharedMainContext.performBlock {
+            self.sharedBackgroundContext.performBlockAndWait {
                 photo.getImageData()
-                if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
-                    performUIUpdatesOnMain {
-                        cellToUpdate.showImage(photo.imageData!)
-                    }
+                try! self.sharedBackgroundContext.save()
+            }
+            if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
+                var pendingImageData: NSData? = nil
+                sharedBackgroundContext.performBlockAndWait {
+                    pendingImageData = photo.imageData
                 }
-                self.saveContext()
+                performUIUpdatesOnMain {
+                    cellToUpdate.showImage(pendingImageData!)
+                }
             }
             return
         }
-        
-        cell.showImage(photo.imageData!)
+        performUIUpdatesOnMain {
+            cell.showImage(imageData)
+        }
     }
 }
 
@@ -246,10 +284,18 @@ extension PinDetailViewController: UICollectionViewDataSource {
 extension PinDetailViewController: UICollectionViewDelegate {
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-        if getPhotoDownloadStatus().completed {
-            sharedMainContext.deleteObject(photo)
+        
+        guard getPhotoDownloadStatus().completed else {
+            return
         }
+
+        let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+
+        sharedBackgroundContext.performBlockAndWait {
+            self.sharedBackgroundContext.deleteObject(photo)
+            try! self.sharedBackgroundContext.save()
+        }
+        saveContext()
     }
 }
 
@@ -282,25 +328,27 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
 
-        collectionView.performBatchUpdates( { () -> Void in
-            
-            for indexPath in self.insertedIndexPaths {
-                self.collectionView.insertItemsAtIndexPaths([indexPath])
-            }
-            
-            for indexPath in self.deletedIndexPaths {
-                self.collectionView.deleteItemsAtIndexPaths([indexPath])
-            }
-            
-            for indexPath in self.updatedIndexPaths {
-                self.collectionView.reloadItemsAtIndexPaths([indexPath])
-            }
-            }, completion: { (success) in
-                if !self.getPhotoDownloadStatus().completed {
-                    self.downloadAnImage()
+        performUIUpdatesOnMain {
+            self.collectionView.performBatchUpdates( { () -> Void in
+                
+                for indexPath in self.insertedIndexPaths {
+                    self.collectionView.insertItemsAtIndexPaths([indexPath])
                 }
-            }
-        )
+                
+                for indexPath in self.deletedIndexPaths {
+                    self.collectionView.deleteItemsAtIndexPaths([indexPath])
+                }
+                
+                for indexPath in self.updatedIndexPaths {
+                    self.collectionView.reloadItemsAtIndexPaths([indexPath])
+                }
+                }, completion: { (success) in
+                    if !self.getPhotoDownloadStatus().completed {
+                        self.downloadAnImage()
+                    }
+                }
+            )
+        }
         
         let (state, remaining) = getPhotoDownloadStatus()
         enableNewCollectionButton(state, remaining: remaining)
