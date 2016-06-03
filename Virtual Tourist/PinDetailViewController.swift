@@ -293,9 +293,8 @@ extension PinDetailViewController: UICollectionViewDelegate {
 
         sharedBackgroundContext.performBlockAndWait {
             self.sharedBackgroundContext.deleteObject(photo)
-            try! self.sharedBackgroundContext.save()
+            CoreDataStackManager.sharedInstance.saveTempContext(self.sharedBackgroundContext)
         }
-        saveContext()
     }
 }
 

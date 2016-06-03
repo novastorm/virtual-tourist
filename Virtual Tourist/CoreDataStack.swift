@@ -188,22 +188,21 @@ extension CoreDataStack {
 
 // MARK:  - Save
 extension CoreDataStack {
-    
+
+    // must call within context
     func saveTempContext(context: NSManagedObjectContext) {
-        context.performBlock {
-            guard context.hasChanges else {
-                return
-            }
-            
-            do {
-                try context.save()
-            }
-            catch {
-                fatalError("Error while saving temporary context \(error)")
-            }
+        guard context.hasChanges else {
+            return
         }
         
-        saveMainContext()
+        do {
+            try context.save()
+        }
+        catch {
+            fatalError("Error while saving temporary context \(error)")
+        }
+        
+        self.saveMainContext()
     }
     
     func saveMainContext() {
