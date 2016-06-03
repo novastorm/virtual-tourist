@@ -203,8 +203,8 @@ class PinDetailViewController: UIViewController {
             for object in self.fetchedResultsController.fetchedObjects! {
                 self.sharedBackgroundContext.deleteObject(object as! NSManagedObject)
             }
+            CoreDataStackManager.sharedInstance.saveTempContext(self.sharedBackgroundContext)
         }
-        CoreDataStackManager.sharedInstance.saveTempContext(sharedBackgroundContext)
     }
     
     func enableNewCollectionButton(state: Bool, remaining count: Int = 0) {
@@ -256,25 +256,26 @@ extension PinDetailViewController: UICollectionViewDataSource {
         }
         
         guard (imageData != nil) else {
+            var pendingImageData: NSData? = nil
+
             cell.showLoading()
-            self.sharedBackgroundContext.performBlockAndWait {
-                photo.getImageData()
+            sharedBackgroundContext.performBlock {
+                pendingImageData = photo.getImageData()
                 try! self.sharedBackgroundContext.save()
-            }
-            if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
-                var pendingImageData: NSData? = nil
-                sharedBackgroundContext.performBlockAndWait {
-                    pendingImageData = photo.imageData
-                }
+                self.saveContext()
                 performUIUpdatesOnMain {
-                    cellToUpdate.showImage(pendingImageData!)
+                    if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
+                        pendingImageData = photo.imageData
+                        cellToUpdate.showImage(pendingImageData!)
+                    }
                 }
             }
+
             return
         }
-        performUIUpdatesOnMain {
+//        performUIUpdatesOnMain {
             cell.showImage(imageData)
-        }
+//        }
     }
 }
 
@@ -327,27 +328,25 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
 
-        performUIUpdatesOnMain {
-            self.collectionView.performBatchUpdates( { () -> Void in
-                
-                for indexPath in self.insertedIndexPaths {
-                    self.collectionView.insertItemsAtIndexPaths([indexPath])
+        self.collectionView.performBatchUpdates( { () -> Void in
+            
+            for indexPath in self.insertedIndexPaths {
+                self.collectionView.insertItemsAtIndexPaths([indexPath])
+            }
+            
+            for indexPath in self.deletedIndexPaths {
+                self.collectionView.deleteItemsAtIndexPaths([indexPath])
+            }
+            
+            for indexPath in self.updatedIndexPaths {
+                self.collectionView.reloadItemsAtIndexPaths([indexPath])
+            }
+            }, completion: { (success) in
+                if !self.getPhotoDownloadStatus().completed {
+                    self.downloadAnImage()
                 }
-                
-                for indexPath in self.deletedIndexPaths {
-                    self.collectionView.deleteItemsAtIndexPaths([indexPath])
-                }
-                
-                for indexPath in self.updatedIndexPaths {
-                    self.collectionView.reloadItemsAtIndexPaths([indexPath])
-                }
-                }, completion: { (success) in
-                    if !self.getPhotoDownloadStatus().completed {
-                        self.downloadAnImage()
-                    }
-                }
-            )
-        }
+            }
+        )
         
         let (state, remaining) = getPhotoDownloadStatus()
         enableNewCollectionButton(state, remaining: remaining)
