@@ -31,7 +31,7 @@ class TravelLocationsViewController: UIViewController {
         let fetchRequest = NSFetchRequest(entityName: "Pin")
         fetchRequest.sortDescriptors = []
         
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedBackgroundContext, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedMainContext, sectionNameKeyPath: nil, cacheName: nil)
         
         return fetchedResultsController
     }()
@@ -122,9 +122,9 @@ class TravelLocationsViewController: UIViewController {
     
     func updateMapAnnotations() {
         var pins = [Pin]()
-        sharedBackgroundContext.performBlockAndWait {
+//        sharedBackgroundContext.performBlockAndWait {
             pins = self.fetchedResultsController.fetchedObjects as! [Pin]
-        }
+//        }
         var annotations = [MKAnnotation]()
         
         for pin in pins {
@@ -141,14 +141,14 @@ class TravelLocationsViewController: UIViewController {
         
         let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
         
-        let entity = NSEntityDescription.entityForName("Pin", inManagedObjectContext: self.sharedBackgroundContext)!
+        let entity = NSEntityDescription.entityForName("Pin", inManagedObjectContext: self.sharedMainContext)!
         var pin: Pin!
             
-        CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
-            pin = Pin(entity: entity, insertIntoManagedObjectContext: workerContext)
+//        CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
+            pin = Pin(entity: entity, insertIntoManagedObjectContext: self.sharedMainContext)
             pin.latitude = mapCoordinate.latitude
             pin.longitude = mapCoordinate.longitude
-        }
+//        }
         
         saveContext()
         
