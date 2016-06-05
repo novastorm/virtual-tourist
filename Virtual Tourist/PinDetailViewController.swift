@@ -170,7 +170,7 @@ class PinDetailViewController: UIViewController {
                     return
                 }
                 
-                CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
+                CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
                     let pin = workerContext.objectWithID(self.annotation.pin.objectID) as! Pin
                     
                     for record in photoResults {
