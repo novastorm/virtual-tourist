@@ -193,8 +193,11 @@ class PinDetailViewController: UIViewController {
     }
     
     func clearPhotos() {
-        for object in self.fetchedResultsController.fetchedObjects! {
-            self.sharedBackgroundContext.deleteObject(object as! NSManagedObject)
+        CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
+            for object in self.fetchedResultsController.fetchedObjects! {
+                let objectInContext = workerContext.objectWithID(object.objectID)
+                workerContext.deleteObject(objectInContext)
+            }
         }
         saveContext()
     }
@@ -245,13 +248,13 @@ extension PinDetailViewController: UICollectionViewDataSource {
         
         imageData = photo.imageData
         
+        cell.showLoading()
         guard (imageData != nil) else {
-            
-            cell.showLoading()
-            CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
-                let pendingImageData = photo.getImageData()
-                if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
-                    performUIUpdatesOnMain {
+            CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
+                let photoInContext = workerContext.objectWithID(photo.objectID) as! Photo
+                let pendingImageData = photoInContext.getImageData()
+                performUIUpdatesOnMain {
+                    if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
                         cellToUpdate.showImage(pendingImageData)
                     }
                 }
@@ -275,9 +278,12 @@ extension PinDetailViewController: UICollectionViewDelegate {
             return
         }
         
-        let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-        
-        self.sharedBackgroundContext.deleteObject(photo)
+
+        CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
+            let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+            let photoInContext = workerContext.objectWithID(photo.objectID)
+            workerContext.deleteObject(photoInContext)
+        }
         
         saveContext()
     }
