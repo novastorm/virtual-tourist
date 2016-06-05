@@ -23,10 +23,6 @@ class TravelLocationsViewController: UIViewController {
         return CoreDataStackManager.sharedInstance.mainContext
     }
     
-    var sharedBackgroundContext: NSManagedObjectContext {
-        return CoreDataStackManager.sharedInstance.backgroundContext
-    }
-    
     lazy var fetchedResultsController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: "Pin")
         fetchRequest.sortDescriptors = []
@@ -121,7 +117,7 @@ class TravelLocationsViewController: UIViewController {
     // MARK: - Helpers
     
     func updateMapAnnotations() {
-        var pins = fetchedResultsController.fetchedObjects as! [Pin]
+        let pins = fetchedResultsController.fetchedObjects as! [Pin]
         var annotations = [MKAnnotation]()
         
         for pin in pins {

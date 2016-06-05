@@ -25,7 +25,7 @@ extension FlickrClient {
         static let SearchLatRange = (-90.0, 90.0)
         static let SearchLonRange = (-180.0, 180.0)
         static let ResponseFormat = "json"
-        static let PerPage = 60
+        static let PerPage = 30
         static let SearchRadius = 5
     }
     

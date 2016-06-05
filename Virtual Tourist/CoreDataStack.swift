@@ -24,7 +24,7 @@ struct CoreDataStack {
     private let modelURL : NSURL
     private let dbURL : NSURL
     private let persistingContext : NSManagedObjectContext
-    let backgroundContext : NSManagedObjectContext
+    private let backgroundContext : NSManagedObjectContext
     let mainContext : NSManagedObjectContext
     
     

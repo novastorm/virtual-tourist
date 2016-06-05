@@ -39,10 +39,6 @@ class PinDetailViewController: UIViewController {
         return CoreDataStackManager.sharedInstance.mainContext
     }
     
-    var sharedBackgroundContext: NSManagedObjectContext {
-        return CoreDataStackManager.sharedInstance.backgroundContext
-    }
-    
     lazy var fetchedResultsController: NSFetchedResultsController = {
         
         let fetchRequest = NSFetchRequest(entityName: "Photo")
@@ -128,17 +124,15 @@ class PinDetailViewController: UIViewController {
     // MARK: - Helpers
     
     func getPhotoDownloadStatus() -> (completed: Bool, remaining: Int) {
-        var numberOfPhotos = 0
         var numberOfPendingPhotos = 0
         
-        numberOfPhotos = (self.annotation.pin.photos?.count)!
         for photo in self.fetchedResultsController.fetchedObjects as! [Photo] {
             if photo.imageData == nil {
                 numberOfPendingPhotos += 1
             }
         }
         
-        return (numberOfPhotos > 0 && numberOfPendingPhotos == 0, numberOfPendingPhotos)
+        return (numberOfPendingPhotos == 0, numberOfPendingPhotos)
     }
     
     func getPhotos() {
@@ -184,10 +178,13 @@ class PinDetailViewController: UIViewController {
     }
     
     func downloadAnImage() {
-        for photo in self.fetchedResultsController.fetchedObjects as! [Photo] {
-            if photo.imageData == nil {
-                photo.getImageData()
-                break
+        CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
+            for photo in self.fetchedResultsController.fetchedObjects as! [Photo] {
+                let photoInContext = try! workerContext.existingObjectWithID(photo.objectID) as! Photo
+                if photoInContext.imageData == nil {
+                    photoInContext.getImageData()
+                    break
+                }
             }
         }
     }
