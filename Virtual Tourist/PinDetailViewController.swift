@@ -108,9 +108,13 @@ class PinDetailViewController: UIViewController {
         
         self.mapView.removeAnnotations(self.mapView.annotations)
         self.mapView.addAnnotation(self.annotation)
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         
         let (state, remaining) = getPhotoDownloadStatus()
-        enableNewCollectionButton(state, remaining: remaining)
+        enableNewCollectionButton(state, remaining: remaining)        
     }
     
     // MARK: - Actions
@@ -186,15 +190,13 @@ class PinDetailViewController: UIViewController {
                     break
                 }
             }
+            self.saveContext()
         }
     }
     
     func clearPhotos() {
-        CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
-            for object in self.fetchedResultsController.fetchedObjects! {
-                let objectInContext = workerContext.objectWithID(object.objectID)
-                workerContext.deleteObject(objectInContext)
-            }
+        for object in self.fetchedResultsController.fetchedObjects as! [Photo] {
+            self.sharedMainContext.deleteObject(object)
         }
         saveContext()
     }
@@ -255,6 +257,7 @@ extension PinDetailViewController: UICollectionViewDataSource {
                         cellToUpdate.showImage(pendingImageData)
                     }
                 }
+                self.saveContext()
             }
             
             return
