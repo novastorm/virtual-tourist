@@ -121,10 +121,7 @@ class TravelLocationsViewController: UIViewController {
     // MARK: - Helpers
     
     func updateMapAnnotations() {
-        var pins = [Pin]()
-//        sharedBackgroundContext.performBlockAndWait {
-            pins = self.fetchedResultsController.fetchedObjects as! [Pin]
-//        }
+        var pins = fetchedResultsController.fetchedObjects as! [Pin]
         var annotations = [MKAnnotation]()
         
         for pin in pins {
@@ -141,14 +138,7 @@ class TravelLocationsViewController: UIViewController {
         
         let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
         
-        let entity = NSEntityDescription.entityForName("Pin", inManagedObjectContext: self.sharedMainContext)!
-        var pin: Pin!
-            
-//        CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
-            pin = Pin(entity: entity, insertIntoManagedObjectContext: self.sharedMainContext)
-            pin.latitude = mapCoordinate.latitude
-            pin.longitude = mapCoordinate.longitude
-//        }
+        let pin = Pin(lat: mapCoordinate.latitude, lon: mapCoordinate.longitude, context: self.sharedMainContext)
         
         saveContext()
         
