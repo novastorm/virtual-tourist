@@ -86,7 +86,7 @@
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tYx-q3-gV7">
                                                     <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                 </imageView>
-                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="s8B-EL-8Yz">
+                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="s8B-EL-8Yz">
                                                     <rect key="frame" x="32" y="31" width="37" height="37"/>
                                                 </activityIndicatorView>
                                             </subviews>
@@ -117,16 +117,16 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="HP5-1f-Y5W">
-                        <barButtonItem key="rightBarButtonItem" enabled="NO" title="Reload Images" id="LJd-zJ-wA3">
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" title="New Collection" id="LJd-zJ-wA3">
                             <connections>
-                                <action selector="reloadImages:" destination="6aF-Ge-WgX" id="jbE-bX-bqL"/>
+                                <action selector="getNewCollection:" destination="6aF-Ge-WgX" id="9mj-KZ-ZRH"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="collectionView" destination="1hz-ea-onK" id="1OV-9H-P63"/>
                         <outlet property="mapView" destination="zXy-Ee-Atx" id="xPn-sv-OoO"/>
-                        <outlet property="reloadImagesButton" destination="LJd-zJ-wA3" id="732-Vx-TfG"/>
+                        <outlet property="newCollectionButton" destination="LJd-zJ-wA3" id="ff9-cE-yN6"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cSk-p7-tCx" userLabel="First Responder" sceneMemberID="firstResponder"/>
