@@ -163,7 +163,10 @@ class PinDetailViewController: UIViewController {
                     return
                 }
                 
-                CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
+                // check for actual existing photos
+                // retry if page > 0 and photo array contains nothing
+                
+                CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
                     let pin = workerContext.objectWithID(self.annotation.pin.objectID) as! Pin
                     
                     for record in photoResults {
@@ -172,6 +175,7 @@ class PinDetailViewController: UIViewController {
                         photo.pin = pin
                     }
                 }
+                self.saveContext()
             }
         }
     }
