@@ -27,7 +27,7 @@ extension FlickrClient {
         static let ResponseFormat = "json"
         static let PerPage = 30
         static let SearchRadius = 5
-        static let MaxPhotosReturned = 2000
+        static let MaxPhotosReturned = Config.PerPage * 50
     }
     
     
