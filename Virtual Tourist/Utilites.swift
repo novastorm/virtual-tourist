@@ -19,3 +19,7 @@ import Foundation
 func random(upper: Int, start lower: Int = 0) -> Int {
     return Int(arc4random_uniform(UInt32(upper - lower + 1))) + lower
 }
+
+func distanceInMeters(kilometers kilometers: Double) -> Double {
+    return kilometers * 1000
+}

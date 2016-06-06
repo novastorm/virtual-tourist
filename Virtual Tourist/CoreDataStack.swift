@@ -1,9 +1,9 @@
 //
 //  CoreDataStack.swift
+//  Virtual Tourist
 //
-//
-//  Created by Fernando Rodríguez Romero on 21/02/16.
-//  Copyright © 2016 udacity.com. All rights reserved.
+//  Created by Adland Lee on 5/12/16.
+//  Copyright © 2016 Adland Lee. All rights reserved.
 //
 
 import CoreData
@@ -25,7 +25,7 @@ struct CoreDataStack {
     private let dbURL : NSURL
     private let persistingContext : NSManagedObjectContext
     private let backgroundContext : NSManagedObjectContext
-    let context : NSManagedObjectContext
+    let mainContext : NSManagedObjectContext
     
     
     // MARK:  - Initializers
@@ -55,13 +55,13 @@ struct CoreDataStack {
         persistingContext.name = "Persisting"
         persistingContext.persistentStoreCoordinator = coordinator
         
-        context = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
-        context.parentContext = persistingContext
-        context.name = "Main"
+        mainContext = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
+        mainContext.parentContext = persistingContext
+        mainContext.name = "Main"
         
         // Create a background context child of main context
         backgroundContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
-        backgroundContext.parentContext = context
+        backgroundContext.parentContext = mainContext
         backgroundContext.name = "Background"
         
         
@@ -115,7 +115,22 @@ extension CoreDataStack  {
 // MARK:  - Batch processing in the background
 extension CoreDataStack{
     
-    func performBackgroundBatchOperation(batch: BatchTask){
+    func performBackgroundBatchOperation(batch: BatchTask) {
+        
+        backgroundContext.performBlockAndWait(){
+            batch(workerContext: self.backgroundContext)
+            
+            // Save it to the parent context, so normal saving
+            // can work
+            do{
+                try self.backgroundContext.save()
+            }catch{
+                fatalError("Error while saving backgroundContext: \(error)")
+            }
+        }
+    }
+    
+    func performAsyncBackgroundBatchOperation(batch: BatchTask) {
         
         backgroundContext.performBlock(){
             batch(workerContext: self.backgroundContext)
@@ -173,30 +188,51 @@ extension CoreDataStack {
 
 // MARK:  - Save
 extension CoreDataStack {
+
+    // must call within context
+    func saveTempContext(context: NSManagedObjectContext) {
+        guard context.hasChanges else {
+            return
+        }
+        
+        do {
+            try context.save()
+        }
+        catch {
+            fatalError("Error while saving temporary context \(error)")
+        }
+        
+        self.saveMainContext()
+    }
     
-    func save() {
+    func saveMainContext() {
         // We call this synchronously, but it's a very fast
         // operation (it doesn't hit the disk). We need to know
         // when it ends so we can call the next save (on the persisting
         // context). This last one might take some time and is done
         // in a background queue
-        context.performBlockAndWait(){
+        mainContext.performBlockAndWait(){
+            guard self.mainContext.hasChanges else {
+                return
+            }
+
+            do{
+                try self.mainContext.save()
+            }catch{
+                fatalError("Error while saving main context: \(error)")
+            }
             
-            if self.context.hasChanges{
-                do{
-                    try self.context.save()
-                }catch{
-                    fatalError("Error while saving main context: \(error)")
-                }
-                
-                // now we save in the background
-                self.persistingContext.performBlock(){
-                    do{
-                        try self.persistingContext.save()
-                    }catch{
-                        fatalError("Error while saving persisting context: \(error)")
-                    }
-                }
+            // now we save in the background
+            self.savePersistingContext()
+        }
+    }
+    
+    func savePersistingContext() {
+        persistingContext.performBlock {
+            do{
+                try self.persistingContext.save()
+            }catch{
+                fatalError("Error while saving persisting context: \(error)")
             }
         }
     }
@@ -206,7 +242,7 @@ extension CoreDataStack {
         
         if delayInSeconds > 0 {
 
-            save()
+            saveMainContext()
             
             let delayInNanoSeconds = UInt64(delayInSeconds) * NSEC_PER_SEC
             let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delayInNanoSeconds))

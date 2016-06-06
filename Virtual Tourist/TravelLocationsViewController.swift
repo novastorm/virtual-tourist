@@ -19,21 +19,25 @@ class TravelLocationsViewController: UIViewController {
     
     // MARK: - Core Data convenience methods
     
-    var sharedContext: NSManagedObjectContext {
-        return CoreDataStackManager.sharedInstance.context
+    var sharedMainContext: NSManagedObjectContext {
+        return CoreDataStackManager.sharedInstance.mainContext
     }
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: "Pin")
         fetchRequest.sortDescriptors = []
         
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedMainContext, sectionNameKeyPath: nil, cacheName: nil)
         
         return fetchedResultsController
     }()
     
     func saveContext() {
-        CoreDataStackManager.sharedInstance.save()
+        CoreDataStackManager.sharedInstance.saveMainContext()
+    }
+    
+    func saveTempContext(context: NSManagedObjectContext) {
+        CoreDataStackManager.sharedInstance.saveTempContext(context)
     }
     
     // MARK: - View Cycle
@@ -71,6 +75,7 @@ class TravelLocationsViewController: UIViewController {
         catch {
             abort()
         }
+        
         updateMapAnnotations()
         
     }
@@ -121,22 +126,15 @@ class TravelLocationsViewController: UIViewController {
             annotations.append(annotation)
         }
         
-        performUIUpdatesOnMain {
-            self.mapView.removeAnnotations(self.mapView.annotations)
-            self.mapView.addAnnotations(annotations)
-        }
+        self.mapView.removeAnnotations(self.mapView.annotations)
+        self.mapView.addAnnotations(annotations)
     }
     
     func addPin(at touchPoint: CGPoint) {
         
         let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
-//        let annotation = MKPointAnnotation()
-//        annotation.coordinate = mapCoordinate
         
-        let pin = Pin(
-            lat: mapCoordinate.latitude,
-            lon: mapCoordinate.longitude,
-            context: sharedContext)
+        let pin = Pin(lat: mapCoordinate.latitude, lon: mapCoordinate.longitude, context: self.sharedMainContext)
         
         saveContext()
         
@@ -170,7 +168,6 @@ extension TravelLocationsViewController: MKMapViewDelegate {
         
         pinDetailVC.annotation = view.annotation as! PinAnnotation
         
-//        presentViewController(PinDetailVC, animated: true, completion: nil)
         navigationController!.pushViewController(pinDetailVC, animated: true)
     }
     
