@@ -19,6 +19,7 @@ class PinDetailViewController: UIViewController {
     let newCollectionButtonTitleDefault = "New Collection"
     let newCollectionButtonTitleDownloading = "Downloading (25)"
     let viewScaleRadiusKm = 50
+    let numberOfStaticCells = 1
     
     var annotation: PinAnnotation!
     
@@ -205,18 +206,14 @@ class PinDetailViewController: UIViewController {
 extension PinDetailViewController: UICollectionViewDataSource {
     
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-        return (fetchedResultsController.sections!.count ?? 0) + 1
+        return fetchedResultsController.sections!.count ?? 0
     }
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        if section == 0 {
-            return 1
-        }
+        let sectionInfo = fetchedResultsController.sections![section]
         
-        let sectionInfo = fetchedResultsController.sections![section - 1]
-        
-        return sectionInfo.numberOfObjects
+        return sectionInfo.numberOfObjects + numberOfStaticCells
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
@@ -224,7 +221,7 @@ extension PinDetailViewController: UICollectionViewDataSource {
         var cellIdentifier: String
         var cell: UICollectionViewCell
         
-        if indexPath.section == 0 && indexPath.item == 0 {
+        if indexPath.item == 0 {
             cellIdentifier = "Map"
             let mapCell = collectionView.dequeueReusableCellWithReuseIdentifier(cellIdentifier, forIndexPath: indexPath) as! MapCollectionViewCell
             
@@ -260,8 +257,9 @@ extension PinDetailViewController: UICollectionViewDataSource {
     
     func configurePinPhotoCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
 
-        let indexPathAdjusted = NSIndexPath(forItem: indexPath.item, inSection: 0)
+        let indexPathAdjusted = NSIndexPath(forItem: indexPath.item - numberOfStaticCells, inSection: 0)
 
+        // use adjusted indexPath for fetching an object
         let photo = fetchedResultsController.objectAtIndexPath(indexPathAdjusted) as! Photo
         var imageData: NSData!
         
@@ -273,7 +271,8 @@ extension PinDetailViewController: UICollectionViewDataSource {
                 let photoInContext = workerContext.objectWithID(photo.objectID) as! Photo
                 let pendingImageData = photoInContext.getImageData()
                 performUIUpdatesOnMain {
-                    if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPathAdjusted) as? PinPhotoCollectionViewCell {
+                    // use normal indexPath for cell selection
+                    if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
                         cellToUpdate.showImage(pendingImageData)
                     }
                 }
@@ -294,7 +293,7 @@ extension PinDetailViewController: UICollectionViewDelegate {
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         
-        guard indexPath.section != 0 else {
+        guard indexPath.item != 0 else {
             return
         }
         
@@ -303,7 +302,7 @@ extension PinDetailViewController: UICollectionViewDelegate {
         }
         
         
-        let indexPathAdjusted = NSIndexPath(forItem: indexPath.item, inSection: 0)
+        let indexPathAdjusted = NSIndexPath(forItem: indexPath.item - numberOfStaticCells, inSection: 0)
 
 
         CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
@@ -332,13 +331,13 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
     
         switch type {
         case .Insert:
-            let newIndexPathAdjusted = NSIndexPath(forItem: newIndexPath!.item, inSection: 1)
+            let newIndexPathAdjusted = NSIndexPath(forItem: newIndexPath!.item + numberOfStaticCells, inSection: 0)
             insertedIndexPaths.append(newIndexPathAdjusted)
         case .Delete:
-            let indexPathAdjusted = NSIndexPath(forItem: indexPath!.item, inSection: 1)
+            let indexPathAdjusted = NSIndexPath(forItem: indexPath!.item + numberOfStaticCells, inSection: 0)
             deletedIndexPaths.append(indexPathAdjusted)
         case .Update:
-            let indexPathAdjusted = NSIndexPath(forItem: indexPath!.item, inSection: 1)
+            let indexPathAdjusted = NSIndexPath(forItem: indexPath!.item + numberOfStaticCells, inSection: 0)
             updatedIndexPaths.append(indexPathAdjusted)
         case .Move:
             fallthrough
