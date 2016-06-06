@@ -138,7 +138,11 @@ class PinDetailViewController: UIViewController {
             }
             
             let data = results![FlickrClient.ResponseKeys.Photos] as! [String: AnyObject]
-            let pages = data[FlickrClient.Photos.Pages] as! Int
+            let potentialPages = data[FlickrClient.Photos.Pages] as! Int
+            // Flickr returns at most 4000 images, determine adjusted maximum number of pages.
+            let maxPages = FlickrClient.Config.MaxPhotosReturned / FlickrClient.Config.PerPage
+            let pages = min(potentialPages, maxPages)
+            
             let randomPage = random(pages, start: 1)
             
             FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon, page: randomPage) { (results, error) in
