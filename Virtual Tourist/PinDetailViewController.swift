@@ -102,6 +102,12 @@ class PinDetailViewController: UIViewController {
         enableNewCollectionButton(state, remaining: remaining)        
     }
     
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        // invalidate layout to force relayout on rotation
+        flowLayout.invalidateLayout()
+    }
+    
     // MARK: - Actions
     
     @IBAction func getNewCollection(sender: AnyObject) {
