@@ -14,6 +14,7 @@ class PinDetailViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     @IBOutlet weak var newCollectionButton: UIBarButtonItem!
     
     let newCollectionButtonTitleDefault = "New Collection"
@@ -340,5 +341,22 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
         
         let (state, remaining) = getPhotoDownloadStatus()
         enableNewCollectionButton(state, remaining: remaining)
+    }
+}
+
+
+// MARK: - UICollectionViewDelegateFlowLayout
+
+extension PinDetailViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        
+        let width = floor(collectionView.frame.size.width)
+        let height = floor(collectionView.frame.size.height)
+        
+        let numberAcross:CGFloat = ((width < height) ? 3.0 : 5.0)
+        
+        let itemSize = (width - ((numberAcross - 1) * flowLayout.minimumLineSpacing)) / numberAcross
+        
+        return CGSize(width: itemSize, height: itemSize)
     }
 }
