@@ -12,13 +12,14 @@ import UIKit
 
 class PinDetailViewController: UIViewController {
     
-    @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     @IBOutlet weak var newCollectionButton: UIBarButtonItem!
     
     let newCollectionButtonTitleDefault = "New Collection"
     let newCollectionButtonTitleDownloading = "Downloading (25)"
     let viewScaleRadiusKm = 50
+    let numberOfStaticCells = 1
     
     var annotation: PinAnnotation!
     
@@ -92,22 +93,6 @@ class PinDetailViewController: UIViewController {
         if numberOfPhotos == 0 {
             self.getPhotos()
         }
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        let lat = annotation.coordinate.latitude
-        let lon = annotation.coordinate.longitude
-        let radius = distanceInMeters(kilometers: Double(viewScaleRadiusKm))
-        
-        let coordinate = CLLocationCoordinate2DMake(lat, lon)
-        let region = MKCoordinateRegionMakeWithDistance(coordinate, radius, radius)
-        
-        mapView.setRegion(region, animated: true)
-        
-        self.mapView.removeAnnotations(self.mapView.annotations)
-        self.mapView.addAnnotation(self.annotation)
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -221,28 +206,61 @@ class PinDetailViewController: UIViewController {
 extension PinDetailViewController: UICollectionViewDataSource {
     
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-        return fetchedResultsController.sections?.count ?? 0
+        return fetchedResultsController.sections!.count ?? 0
     }
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
         let sectionInfo = fetchedResultsController.sections![section]
         
-        return sectionInfo.numberOfObjects
+        return sectionInfo.numberOfObjects + numberOfStaticCells
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
-        let identifier = "PinPhoto"
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as! PinPhotoCollectionViewCell
+        var cellIdentifier: String
+        var cell: UICollectionViewCell
         
-        configureCell(cell, atIndexPath: indexPath)
+        if indexPath.item == 0 {
+            cellIdentifier = "Map"
+            let mapCell = collectionView.dequeueReusableCellWithReuseIdentifier(cellIdentifier, forIndexPath: indexPath) as! MapCollectionViewCell
+            
+            configureMapCell(mapCell, atIndexPath: indexPath)
+            cell = mapCell
+        }
+        else {
+            cellIdentifier = "PinPhoto"
+            let pinPhotoCell = collectionView.dequeueReusableCellWithReuseIdentifier(cellIdentifier, forIndexPath: indexPath) as! PinPhotoCollectionViewCell
+            
+            configurePinPhotoCell(pinPhotoCell, atIndexPath: indexPath)
+            cell = pinPhotoCell
+        }
         
         return cell
     }
     
-    func configureCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
-        let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+    func configureMapCell(cell: MapCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+        
+        let lat = annotation.coordinate.latitude
+        let lon = annotation.coordinate.longitude
+        let radius = distanceInMeters(kilometers: Double(viewScaleRadiusKm))
+        
+        let coordinate = CLLocationCoordinate2DMake(lat, lon)
+        let region = MKCoordinateRegionMakeWithDistance(coordinate, radius, radius)
+        
+        cell.mapView.setRegion(region, animated: true)
+        
+        cell.mapView.removeAnnotations(cell.mapView.annotations)
+        cell.mapView.addAnnotation(self.annotation)
+
+    }
+    
+    func configurePinPhotoCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+
+        let indexPathAdjusted = NSIndexPath(forItem: indexPath.item - numberOfStaticCells, inSection: 0)
+
+        // use adjusted indexPath for fetching an object
+        let photo = fetchedResultsController.objectAtIndexPath(indexPathAdjusted) as! Photo
         var imageData: NSData!
         
         imageData = photo.imageData
@@ -253,6 +271,7 @@ extension PinDetailViewController: UICollectionViewDataSource {
                 let photoInContext = workerContext.objectWithID(photo.objectID) as! Photo
                 let pendingImageData = photoInContext.getImageData()
                 performUIUpdatesOnMain {
+                    // use normal indexPath for cell selection
                     if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
                         cellToUpdate.showImage(pendingImageData)
                     }
@@ -274,13 +293,20 @@ extension PinDetailViewController: UICollectionViewDelegate {
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         
+        guard indexPath.item != 0 else {
+            return
+        }
+        
         guard getPhotoDownloadStatus().completed else {
             return
         }
         
+        
+        let indexPathAdjusted = NSIndexPath(forItem: indexPath.item - numberOfStaticCells, inSection: 0)
+
 
         CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
-            let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+            let photo = self.fetchedResultsController.objectAtIndexPath(indexPathAdjusted) as! Photo
             let photoInContext = workerContext.objectWithID(photo.objectID)
             workerContext.deleteObject(photoInContext)
         }
@@ -302,13 +328,17 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
         
+    
         switch type {
         case .Insert:
-            insertedIndexPaths.append(newIndexPath!)
+            let newIndexPathAdjusted = NSIndexPath(forItem: newIndexPath!.item + numberOfStaticCells, inSection: 0)
+            insertedIndexPaths.append(newIndexPathAdjusted)
         case .Delete:
-            deletedIndexPaths.append(indexPath!)
+            let indexPathAdjusted = NSIndexPath(forItem: indexPath!.item + numberOfStaticCells, inSection: 0)
+            deletedIndexPaths.append(indexPathAdjusted)
         case .Update:
-            updatedIndexPaths.append(indexPath!)
+            let indexPathAdjusted = NSIndexPath(forItem: indexPath!.item + numberOfStaticCells, inSection: 0)
+            updatedIndexPaths.append(indexPathAdjusted)
         case .Move:
             fallthrough
         default:
@@ -340,5 +370,22 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
         
         let (state, remaining) = getPhotoDownloadStatus()
         enableNewCollectionButton(state, remaining: remaining)
+    }
+}
+
+
+// MARK: - UICollectionViewDelegateFlowLayout
+
+extension PinDetailViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        
+        let width = floor(collectionView.frame.size.width)
+        let height = floor(collectionView.frame.size.height)
+        
+        let numberAcross:CGFloat = ((width < height) ? 3.0 : 5.0)
+        
+        let itemSize = (width - ((numberAcross - 1) * flowLayout.minimumLineSpacing)) / numberAcross
+        
+        return CGSize(width: itemSize, height: itemSize)
     }
 }
