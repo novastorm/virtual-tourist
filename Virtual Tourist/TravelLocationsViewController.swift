@@ -163,6 +163,9 @@ extension TravelLocationsViewController: MKMapViewDelegate {
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         
+        // deselect annotation to free selection when returning to this view
+        mapView.deselectAnnotation(view.annotation, animated: true)
+        
         let pinDetailVC = storyboard?.instantiateViewControllerWithIdentifier("PinDetailViewController") as! PinDetailViewController
         
         pinDetailVC.annotation = view.annotation as! PinAnnotation

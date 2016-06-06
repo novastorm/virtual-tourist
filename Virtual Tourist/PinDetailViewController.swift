@@ -158,7 +158,7 @@ class PinDetailViewController: UIViewController {
                     return
                 }
                 
-                guard let photoResults = results?[FlickrClient.ResponseKeys.Photos]??[FlickrClient.Photos.Photo] as? [[String:AnyObject]] else {
+                guard let photoResults = results![FlickrClient.ResponseKeys.Photos]!![FlickrClient.Photos.Photo] as? [[String:AnyObject]] else {
                     print("Cannot find photo list in Photos object")
                     return
                 }
