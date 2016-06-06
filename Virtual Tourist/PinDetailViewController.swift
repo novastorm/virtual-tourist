@@ -12,7 +12,6 @@ import UIKit
 
 class PinDetailViewController: UIViewController {
     
-    @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     @IBOutlet weak var newCollectionButton: UIBarButtonItem!
@@ -93,22 +92,6 @@ class PinDetailViewController: UIViewController {
         if numberOfPhotos == 0 {
             self.getPhotos()
         }
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        let lat = annotation.coordinate.latitude
-        let lon = annotation.coordinate.longitude
-        let radius = distanceInMeters(kilometers: Double(viewScaleRadiusKm))
-        
-        let coordinate = CLLocationCoordinate2DMake(lat, lon)
-        let region = MKCoordinateRegionMakeWithDistance(coordinate, radius, radius)
-        
-        mapView.setRegion(region, animated: true)
-        
-        self.mapView.removeAnnotations(self.mapView.annotations)
-        self.mapView.addAnnotation(self.annotation)
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -222,10 +205,14 @@ class PinDetailViewController: UIViewController {
 extension PinDetailViewController: UICollectionViewDataSource {
     
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-        return fetchedResultsController.sections?.count ?? 0
+        return (fetchedResultsController.sections?.count ?? 0)
     }
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        
+//        if section == 0 {
+//            return 1
+//        }
         
         let sectionInfo = fetchedResultsController.sections![section]
         
@@ -234,15 +221,45 @@ extension PinDetailViewController: UICollectionViewDataSource {
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
-        let identifier = "PinPhoto"
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath) as! PinPhotoCollectionViewCell
+        var cellIdentifier: String
+        var cell: UICollectionViewCell
         
-        configureCell(cell, atIndexPath: indexPath)
+        if indexPath.section == 0 && indexPath.item == 0 {
+            cellIdentifier = "Map"
+            let mapCell = collectionView.dequeueReusableCellWithReuseIdentifier(cellIdentifier, forIndexPath: indexPath) as! MapCollectionViewCell
+            
+            configureMapCell(mapCell, atIndexPath: indexPath)
+            cell = mapCell
+        }
+        else {
+            cellIdentifier = "PinPhoto"
+            let pinPhotoCell = collectionView.dequeueReusableCellWithReuseIdentifier(cellIdentifier, forIndexPath: indexPath) as! PinPhotoCollectionViewCell
+            
+            configurePinPhotoCell(pinPhotoCell, atIndexPath: indexPath)
+            cell = pinPhotoCell
+        }
         
         return cell
     }
     
-    func configureCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+    func configureMapCell(cell: MapCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+        
+        let lat = annotation.coordinate.latitude
+        let lon = annotation.coordinate.longitude
+        let radius = distanceInMeters(kilometers: Double(viewScaleRadiusKm))
+        
+        let coordinate = CLLocationCoordinate2DMake(lat, lon)
+        let region = MKCoordinateRegionMakeWithDistance(coordinate, radius, radius)
+        
+        cell.mapView.setRegion(region, animated: true)
+        
+        cell.mapView.removeAnnotations(cell.mapView.annotations)
+        cell.mapView.addAnnotation(self.annotation)
+
+    }
+    
+    func configurePinPhotoCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
+        
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         var imageData: NSData!
         
