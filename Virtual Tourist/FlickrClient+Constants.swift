@@ -11,7 +11,7 @@ extension FlickrClient {
     // MARK: API
     
     struct API {
-        static let Key = "6623dc3039aaa921037bf3ea4d50d66e"
+        static let Key = "Enter API Key"
         static let Scheme = "https"
         static let Host = "api.flickr.com"
         static let Path = "/services/rest"
@@ -27,6 +27,7 @@ extension FlickrClient {
         static let ResponseFormat = "json"
         static let PerPage = 30
         static let SearchRadius = 5
+        static let MaxPhotosReturned = 4000
     }
     
     
@@ -40,7 +41,6 @@ extension FlickrClient {
             static let GalleryPhotosMethod = "flickr.galleries.getPhotos"
         }
     }
-    
     
     
     // MARK: - ParameterKeys
