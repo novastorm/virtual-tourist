@@ -205,16 +205,16 @@ class PinDetailViewController: UIViewController {
 extension PinDetailViewController: UICollectionViewDataSource {
     
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-        return (fetchedResultsController.sections?.count ?? 0)
+        return (fetchedResultsController.sections!.count ?? 0) + 1
     }
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-//        if section == 0 {
-//            return 1
-//        }
+        if section == 0 {
+            return 1
+        }
         
-        let sectionInfo = fetchedResultsController.sections![section]
+        let sectionInfo = fetchedResultsController.sections![section - 1]
         
         return sectionInfo.numberOfObjects
     }
@@ -259,8 +259,10 @@ extension PinDetailViewController: UICollectionViewDataSource {
     }
     
     func configurePinPhotoCell(cell: PinPhotoCollectionViewCell, atIndexPath indexPath: NSIndexPath) {
-        
-        let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+
+        let indexPathAdjusted = NSIndexPath(forItem: indexPath.item, inSection: 0)
+
+        let photo = fetchedResultsController.objectAtIndexPath(indexPathAdjusted) as! Photo
         var imageData: NSData!
         
         imageData = photo.imageData
@@ -271,7 +273,7 @@ extension PinDetailViewController: UICollectionViewDataSource {
                 let photoInContext = workerContext.objectWithID(photo.objectID) as! Photo
                 let pendingImageData = photoInContext.getImageData()
                 performUIUpdatesOnMain {
-                    if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPath) as? PinPhotoCollectionViewCell {
+                    if let cellToUpdate = self.collectionView.cellForItemAtIndexPath(indexPathAdjusted) as? PinPhotoCollectionViewCell {
                         cellToUpdate.showImage(pendingImageData)
                     }
                 }
@@ -292,13 +294,20 @@ extension PinDetailViewController: UICollectionViewDelegate {
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         
+        guard indexPath.section != 0 else {
+            return
+        }
+        
         guard getPhotoDownloadStatus().completed else {
             return
         }
         
+        
+        let indexPathAdjusted = NSIndexPath(forItem: indexPath.item, inSection: 0)
+
 
         CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
-            let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+            let photo = self.fetchedResultsController.objectAtIndexPath(indexPathAdjusted) as! Photo
             let photoInContext = workerContext.objectWithID(photo.objectID)
             workerContext.deleteObject(photoInContext)
         }
@@ -320,13 +329,17 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
         
+    
         switch type {
         case .Insert:
-            insertedIndexPaths.append(newIndexPath!)
+            let newIndexPathAdjusted = NSIndexPath(forItem: newIndexPath!.item, inSection: 1)
+            insertedIndexPaths.append(newIndexPathAdjusted)
         case .Delete:
-            deletedIndexPaths.append(indexPath!)
+            let indexPathAdjusted = NSIndexPath(forItem: indexPath!.item, inSection: 1)
+            deletedIndexPaths.append(indexPathAdjusted)
         case .Update:
-            updatedIndexPaths.append(indexPath!)
+            let indexPathAdjusted = NSIndexPath(forItem: indexPath!.item, inSection: 1)
+            updatedIndexPaths.append(indexPathAdjusted)
         case .Move:
             fallthrough
         default:
