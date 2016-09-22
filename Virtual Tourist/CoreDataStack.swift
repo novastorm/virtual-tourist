@@ -73,7 +73,7 @@ struct CoreDataStack {
             return nil
         }
         
-        self.dbURL = docUrl.URLByAppendingPathComponent("model.sqlite")
+        self.dbURL = docUrl.URLByAppendingPathComponent(modelName + ".sqlite")
         
         do{
             try addStoreTo(coordinator: coordinator,

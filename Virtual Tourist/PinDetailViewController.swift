@@ -88,7 +88,7 @@ class PinDetailViewController: UIViewController {
         
         var numberOfPhotos = 0
         
-        numberOfPhotos = self.annotation.pin.photos!.count
+        numberOfPhotos = self.annotation.pin.photos.count
         
         if numberOfPhotos == 0 {
             self.getPhotos()
@@ -134,8 +134,8 @@ class PinDetailViewController: UIViewController {
         var lat: Double!
         var lon: Double!
         
-        lat = self.annotation.pin.latitude as! Double
-        lon = self.annotation.pin.longitude as! Double
+        lat = self.annotation.pin.latitude
+        lon = self.annotation.pin.longitude 
         
         FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
             if let error = error {
@@ -319,7 +319,7 @@ extension PinDetailViewController: UICollectionViewDelegate {
         let indexPathAdjusted = NSIndexPath(forItem: indexPath.item - numberOfStaticCells, inSection: 0)
 
 
-        CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
+        CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
             let photo = self.fetchedResultsController.objectAtIndexPath(indexPathAdjusted) as! Photo
             let photoInContext = workerContext.objectWithID(photo.objectID)
             workerContext.deleteObject(photoInContext)
@@ -362,20 +362,22 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         
-        self.collectionView.performBatchUpdates( { () -> Void in
-            
-            for indexPath in self.insertedIndexPaths {
-                self.collectionView.insertItemsAtIndexPaths([indexPath])
-            }
-            
-            for indexPath in self.deletedIndexPaths {
-                self.collectionView.deleteItemsAtIndexPaths([indexPath])
-            }
-            
-            for indexPath in self.updatedIndexPaths {
-                self.collectionView.reloadItemsAtIndexPaths([indexPath])
-            }
-            }, completion: { (success) in
+        self.collectionView.performBatchUpdates(
+            { () -> Void in
+                
+                for indexPath in self.insertedIndexPaths {
+                    self.collectionView.insertItemsAtIndexPaths([indexPath])
+                }
+                
+                for indexPath in self.deletedIndexPaths {
+                    self.collectionView.deleteItemsAtIndexPaths([indexPath])
+                }
+                
+                for indexPath in self.updatedIndexPaths {
+                    self.collectionView.reloadItemsAtIndexPaths([indexPath])
+                }
+            },
+            completion: { (success) in
                 if !self.getPhotoDownloadStatus().completed {
                     self.downloadAnImage()
                 }
