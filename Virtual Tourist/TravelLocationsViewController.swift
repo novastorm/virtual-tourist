@@ -23,11 +23,11 @@ class TravelLocationsViewController: UIViewController {
         return CoreDataStackManager.sharedInstance.mainContext
     }
     
-    lazy var fetchedResultsController: NSFetchedResultsController = {
-        let fetchRequest = NSFetchRequest(entityName: "Pin")
+    lazy var fetchedResultsController: NSFetchedResultsController<Pin> = {
+        let fetchRequest = NSFetchRequest<Pin>(entityName: "Pin")
         fetchRequest.sortDescriptors = []
         
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedMainContext, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController<Pin>(fetchRequest: fetchRequest, managedObjectContext: self.sharedMainContext, sectionNameKeyPath: nil, cacheName: nil)
         
         return fetchedResultsController
     }()
@@ -36,13 +36,13 @@ class TravelLocationsViewController: UIViewController {
         CoreDataStackManager.sharedInstance.saveMainContext()
     }
     
-    func saveTempContext(context: NSManagedObjectContext) {
+    func saveTempContext(_ context: NSManagedObjectContext) {
         CoreDataStackManager.sharedInstance.saveTempContext(context)
     }
     
     // MARK: - View Cycle
     
-    override func prefersStatusBarHidden() -> Bool {
+    override var prefersStatusBarHidden : Bool {
         return true
     }
     
@@ -50,7 +50,7 @@ class TravelLocationsViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        let savedRegion = NSUserDefaults.standardUserDefaults().objectForKey(AppDelegate.UserDefaultKeys.MapViewRegion) as! [String: AnyObject]
+        let savedRegion = UserDefaults.standard.object(forKey: AppDelegate.UserDefaultKeys.MapViewRegion) as! [String: AnyObject]
         
         let region = MKCoordinateRegion(
             center: CLLocationCoordinate2DMake(
@@ -64,7 +64,7 @@ class TravelLocationsViewController: UIViewController {
             )
         
         mapView.setRegion(region, animated: false)
-        mapView.setCenterCoordinate(region.center, animated: true)
+        mapView.setCenter(region.center, animated: true)
         mapView.delegate = self
         
         fetchedResultsController.delegate = self
@@ -80,14 +80,14 @@ class TravelLocationsViewController: UIViewController {
         
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        navigationController?.navigationBarHidden = true
+        navigationController?.isNavigationBarHidden = true
     }
     
-    override func viewWillDisappear(animated: Bool) {
-        navigationController?.navigationBarHidden = false
+    override func viewWillDisappear(_ animated: Bool) {
+        navigationController?.isNavigationBarHidden = false
         
         super.viewWillDisappear(animated)
     }
@@ -95,17 +95,17 @@ class TravelLocationsViewController: UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func handleLongPress(sender: UILongPressGestureRecognizer) {
+    @IBAction func handleLongPress(_ sender: UILongPressGestureRecognizer) {
 
         switch sender.state {
-        case .Began:
-            addPin(at: sender.locationInView(mapView))
+        case .began:
+            addPin(at: sender.location(in: mapView))
             // refactor to setup pin and draggable
             break
-        case .Changed:
+        case .changed:
             // have pin track user touch location
             break
-        case .Ended:
+        case .ended:
             // drop pin at last touchpoint
             break
         default:
@@ -117,7 +117,7 @@ class TravelLocationsViewController: UIViewController {
     // MARK: - Helpers
     
     func updateMapAnnotations() {
-        let pins = fetchedResultsController.fetchedObjects as! [Pin]
+        let pins = fetchedResultsController.fetchedObjects!
         var annotations = [MKAnnotation]()
         
         for pin in pins {
@@ -132,7 +132,7 @@ class TravelLocationsViewController: UIViewController {
     
     func addPin(at touchPoint: CGPoint) {
         
-        let mapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
+        let mapCoordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
         
         let pin = Pin(lat: mapCoordinate.latitude, lon: mapCoordinate.longitude, context: self.sharedMainContext)
         
@@ -142,8 +142,8 @@ class TravelLocationsViewController: UIViewController {
         mapView.addAnnotation(annotation)
     }
     
-    func saveMapViewRegion(region: MKCoordinateRegion) {
-        NSUserDefaults.standardUserDefaults().setObject([
+    func saveMapViewRegion(_ region: MKCoordinateRegion) {
+        UserDefaults.standard.set([
                   "latitude": region.center.latitude,
                  "longitude": region.center.longitude,
              "latitudeDelta": region.span.latitudeDelta,
@@ -157,16 +157,16 @@ class TravelLocationsViewController: UIViewController {
 
 extension TravelLocationsViewController: MKMapViewDelegate {
     
-    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         saveMapViewRegion(mapView.region)
     }
     
-    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
         // deselect annotation to free selection when returning to this view
         mapView.deselectAnnotation(view.annotation, animated: true)
         
-        let pinDetailVC = storyboard?.instantiateViewControllerWithIdentifier("PinDetailViewController") as! PinDetailViewController
+        let pinDetailVC = storyboard?.instantiateViewController(withIdentifier: "PinDetailViewController") as! PinDetailViewController
         
         pinDetailVC.annotation = view.annotation as! PinAnnotation
         
@@ -177,7 +177,7 @@ extension TravelLocationsViewController: MKMapViewDelegate {
 
 extension TravelLocationsViewController: NSFetchedResultsControllerDelegate {
     
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         updateMapAnnotations()
     }
 }

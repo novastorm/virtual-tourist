@@ -22,7 +22,7 @@ class CoreDataStackManager {
     static let sharedInstance = CoreDataStack(modelName: "Virtual_Tourist")!
 
      // Disable default initializer
-    private init() {}
+    fileprivate init() {}
 
 }
 

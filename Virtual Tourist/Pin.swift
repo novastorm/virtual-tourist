@@ -19,11 +19,11 @@ class Pin: NSManagedObject {
     }
     
     convenience init(lat: Double, lon: Double, context: NSManagedObjectContext) {
-        let entity = NSEntityDescription.entityForName("Pin", inManagedObjectContext: context)!
+        let entity = NSEntityDescription.entity(forEntityName: "Pin", in: context)!
         
-        self.init(entity: entity, insertIntoManagedObjectContext: context)
+        self.init(entity: entity, insertInto: context)
         
-        latitude = lat
-        longitude = lon
+        latitude = lat as NSNumber
+        longitude = lon as NSNumber
     }
 }
