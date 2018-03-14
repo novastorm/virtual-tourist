@@ -51,7 +51,7 @@ class PinDetailViewController: UIViewController {
         return fetchedResultsController
     }()
     
-    func saveContext() {
+    @objc func saveContext() {
         CoreDataStackManager.sharedInstance.saveMainContext()
     }
     
@@ -274,7 +274,7 @@ extension PinDetailViewController: UICollectionViewDataSource {
         let indexPathAdjusted = IndexPath(item: indexPath.item - numberOfStaticCells, section: 0)
 
         // use adjusted indexPath for fetching an object
-        let photo = fetchedResultsController.object(at: indexPathAdjusted) as! Photo
+        let photo = fetchedResultsController.object(at: indexPathAdjusted) 
         var imageData: Data!
         
         imageData = photo.imageData
@@ -320,7 +320,7 @@ extension PinDetailViewController: UICollectionViewDelegate {
 
 
         CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
-            let photo = self.fetchedResultsController.object(at: indexPathAdjusted) as! Photo
+            let photo = self.fetchedResultsController.object(at: indexPathAdjusted) 
             let photoInContext = workerContext.object(with: photo.objectID)
             workerContext.delete(photoInContext)
         }
