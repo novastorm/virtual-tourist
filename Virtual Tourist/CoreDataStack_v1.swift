@@ -9,7 +9,7 @@ extension Notification.Name {
 }
 
 // MARK:  - Main
-final class CoreDataStack_v1: CoreDataStack {
+class CoreDataStack_v1: CoreDataStack {
     
     // MARK:  - Properties
     fileprivate let model : NSManagedObjectModel
@@ -22,7 +22,7 @@ final class CoreDataStack_v1: CoreDataStack {
     
     
     // MARK:  - Initializers
-    init?(modelName: String){
+    required init?(modelName: String){
         
         // Assumes the model is in the main bundle
         guard let modelURL = Bundle.main.url(forResource: modelName, withExtension: "momd") else {

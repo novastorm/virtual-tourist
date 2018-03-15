@@ -16,11 +16,12 @@ class TravelLocationsViewController: UIViewController {
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet var longPressGestureRecognizer: UILongPressGestureRecognizer!
     
+    let coreDataStack: CoreDataStack!
     
     // MARK: - Core Data convenience methods
     
     var sharedMainContext: NSManagedObjectContext {
-        return CoreDataStackManager.shared.mainContext
+        return coreDataStack.mainContext
     }
     
     lazy var fetchedResultsController: NSFetchedResultsController<Pin> = {
@@ -33,17 +34,28 @@ class TravelLocationsViewController: UIViewController {
     }()
     
     func saveContext() {
-        CoreDataStackManager.shared.saveMainContext()
+        coreDataStack.saveMainContext()
     }
     
     func saveTempContext(_ context: NSManagedObjectContext) {
-        CoreDataStackManager.shared.saveTemporaryContext(context)
+        coreDataStack.saveTemporaryContext(context)
     }
     
     // MARK: - View Cycle
     
     override var prefersStatusBarHidden : Bool {
         return true
+    }
+    
+    init?(coder aDecoder: NSCoder,
+          coreDataStack: CoreDataStack = (UIApplication.shared.delegate as! AppDelegate).coreDataStack) {
+        self.coreDataStack = coreDataStack
+        super.init(coder: aDecoder)
+    }
+    
+    required convenience init?(coder aDecoder: NSCoder) {
+        self.init(coder: aDecoder,
+                  coreDataStack: (UIApplication.shared.delegate as! AppDelegate).coreDataStack)
     }
     
     override func viewDidLoad() {

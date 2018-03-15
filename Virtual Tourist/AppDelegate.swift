@@ -12,8 +12,6 @@ import UIKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    let coreDataStack: CoreDataStack = CoreDataStack_v1(modelName: "Virtual_Tourist")!
     
     struct UserDefaultKeys {
         static let HasLaunchedBefore = "hasLaunchedBefore"
@@ -21,20 +19,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     var window: UIWindow?
-    
+
+    let coreDataStack: CoreDataStack = CoreDataStack_v1(modelName: "Virtual_Tourist")!
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {        
         checkIfFirstLaunch()
-        CoreDataStackManager.shared.autoSave(60)
+        coreDataStack.autoSave(60)
         return true
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
-        CoreDataStackManager.shared.saveMainContext()
+        coreDataStack.saveMainContext()
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        CoreDataStackManager.shared.saveMainContext()
+        coreDataStack.saveMainContext()
     }
 
     // MARK: - Helpers
