@@ -23,16 +23,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {        
         checkIfFirstLaunch()
-        CoreDataStackManager.sharedInstance.autoSave(60)
+        CoreDataStackManager.shared.autoSave(60)
         return true
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
-        CoreDataStackManager.sharedInstance.saveMainContext()
+        CoreDataStackManager.shared.saveMainContext()
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        CoreDataStackManager.sharedInstance.saveMainContext()
+        CoreDataStackManager.shared.saveMainContext()
     }
 
     // MARK: - Helpers

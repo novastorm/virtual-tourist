@@ -20,7 +20,7 @@ class TravelLocationsViewController: UIViewController {
     // MARK: - Core Data convenience methods
     
     var sharedMainContext: NSManagedObjectContext {
-        return CoreDataStackManager.sharedInstance.mainContext
+        return CoreDataStackManager.shared.mainContext
     }
     
     lazy var fetchedResultsController: NSFetchedResultsController<Pin> = {
@@ -33,11 +33,11 @@ class TravelLocationsViewController: UIViewController {
     }()
     
     func saveContext() {
-        CoreDataStackManager.sharedInstance.saveMainContext()
+        CoreDataStackManager.shared.saveMainContext()
     }
     
     func saveTempContext(_ context: NSManagedObjectContext) {
-        CoreDataStackManager.sharedInstance.saveTempContext(context)
+        CoreDataStackManager.shared.saveTemporaryContext(context)
     }
     
     // MARK: - View Cycle

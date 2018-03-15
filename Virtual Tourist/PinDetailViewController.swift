@@ -37,7 +37,7 @@ class PinDetailViewController: UIViewController {
     // MARK: - Core Data convenience methods
     
     var sharedMainContext: NSManagedObjectContext {
-        return CoreDataStackManager.sharedInstance.mainContext
+        return CoreDataStackManager.shared.mainContext
     }
     
     lazy var fetchedResultsController: NSFetchedResultsController<Photo> = {
@@ -52,11 +52,11 @@ class PinDetailViewController: UIViewController {
     }()
     
     func saveContext() {
-        CoreDataStackManager.sharedInstance.saveMainContext()
+        CoreDataStackManager.shared.saveMainContext()
     }
     
     func saveTempContext(_ context: NSManagedObjectContext) {
-        CoreDataStackManager.sharedInstance.saveTempContext(context)
+        CoreDataStackManager.shared.saveTemporaryContext(context)
     }
     
     
@@ -83,9 +83,6 @@ class PinDetailViewController: UIViewController {
         }
         
         fetchedResultsController.delegate = self
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(saveContext), name: NSNotification.Name(rawValue: CoreDataStackNotifications.ImportingTaskDidFinish.rawValue), object: nil)
-        
         
         var numberOfPhotos = 0
         
@@ -167,7 +164,7 @@ class PinDetailViewController: UIViewController {
                 // check for actual existing photos
                 // retry if page > 0 and photo array contains nothing
                 
-                CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
+                CoreDataStackManager.shared.performBackgroundBatchOperation { (workerContext) in
                     let pin = workerContext.object(with: self.annotation.pin.objectID) as! Pin
                     
                     for record in photoResults {
@@ -182,7 +179,7 @@ class PinDetailViewController: UIViewController {
     }
     
     func downloadAnImage() {
-        CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
+        CoreDataStackManager.shared.performBackgroundBatchOperation { (workerContext) in
             for photo in self.fetchedResultsController.fetchedObjects! {
                 let photoInContext = try! workerContext.existingObject(with: photo.objectID) as! Photo
                 if photoInContext.imageData == nil {
@@ -280,7 +277,7 @@ extension PinDetailViewController: UICollectionViewDataSource {
         
         cell.showLoading()
         guard (imageData != nil) else {
-            CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
+            CoreDataStackManager.shared.performBackgroundBatchOperation { (workerContext) in
                 let photoInContext = workerContext.object(with: photo.objectID) as! Photo
                 let pendingImageData = photoInContext.getImageData()
                 // use normal indexPath for cell selection
@@ -318,7 +315,7 @@ extension PinDetailViewController: UICollectionViewDelegate {
         let indexPathAdjusted = IndexPath(item: (indexPath as NSIndexPath).item - numberOfStaticCells, section: 0)
 
 
-        CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
+        CoreDataStackManager.shared.performBackgroundBatchOperation { (workerContext) in
             let photo = self.fetchedResultsController.object(at: indexPathAdjusted) 
             let photoInContext = workerContext.object(with: photo.objectID)
             workerContext.delete(photoInContext)
