@@ -19,7 +19,7 @@ class CoreDataStackManager {
      *  This class variable provides an easy way to get access
      *  to a shared instance of the CoreDataStackManager class.
      */
-    static let sharedInstance = CoreDataStack(modelName: "Virtual_Tourist")!
+    static let shared: CoreDataStack = CoreDataStack_v1(modelName: "Virtual_Tourist")!
 
      // Disable default initializer
     fileprivate init() {}
