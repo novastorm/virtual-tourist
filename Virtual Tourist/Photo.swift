@@ -19,17 +19,17 @@ class Photo: NSManagedObject {
     }
     
     convenience init(imageURLString: String, context: NSManagedObjectContext) {
-        let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
+        let entity = NSEntityDescription.entity(forEntityName: "Photo", in: context)!
         
-        self.init(entity: entity, insertIntoManagedObjectContext: context)
+        self.init(entity: entity, insertInto: context)
         
         self.imageURLString = imageURLString
     }
     
-    func getImageData() -> NSData {
-        let imageURL = NSURL(string: imageURLString!)
-        imageData = NSData(contentsOfURL: imageURL!)
+    func getImageData() -> Data {
+        let imageURL = URL(string: imageURLString!)
+        imageData = try? Data(contentsOf: imageURL!)
         
-        return imageData!
+        return imageData! as Data
     }
 }

@@ -13,50 +13,49 @@ class FlickrClient {
     // MARK: Shared Instance
     
     static let sharedInstance = FlickrClient()
-    private init() {}
+    fileprivate init() {}
     
     
     // MARK: - Properties
     
-    var session = NSURLSession.sharedSession()
+    var session = URLSession.shared
     
     
     // MARK: HTTP Methods
     
-    func taskForGetMethod(resource: String, parameters: [String: AnyObject], completionHandler: (results: AnyObject?, error: NSError?) -> Void) -> NSURLSessionDataTask {
+    func taskForGetMethod(_ resource: String, parameters: [String: Any], completionHandler: @escaping (_ results: Any?, _ error: NSError?) -> Void) -> URLSessionDataTask {
         
         // Set Parameters
 //        var parameters = parameters
         
         // Build URL and configure request
-        let request = NSMutableURLRequest(URL: URLFromParameters(parameters, withPathExtension: resource))
+        let request = NSMutableURLRequest(url: URLFromParameters(parameters, withPathExtension: resource))
         
         // Make request
-        let task = session.dataTaskWithRequest(request) { (data, response, error) in
-            
+        let task = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) in
             // Custom error function
-            func sendError(code: Int, errorString: String) {
-                var userInfo = [String: AnyObject]()
+            func sendError(_ code: Int, errorString: String) {
+                var userInfo = [String: Any]()
                 
                 userInfo[NSLocalizedDescriptionKey] = errorString
                 userInfo[NSUnderlyingErrorKey] = error
                 userInfo["http_response"] = response
                 
-                completionHandler(results: nil, error: NSError(domain: "taskForGetMethod", code: code, userInfo: userInfo))
+                completionHandler(nil, NSError(domain: "taskForGetMethod", code: code, userInfo: userInfo))
             }
 
             if let error = error {
-                sendError(error.code, errorString: error.localizedDescription)
+                sendError(error._code, errorString: error.localizedDescription)
                 return
             }
             
-            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where 200 ... 299 ~= statusCode else {
-                sendError(ErrorCodes.HTTPUnsucessful.rawValue, errorString: ErrorCodes.HTTPUnsucessful.description)
+            guard let statusCode = (response as? HTTPURLResponse)?.statusCode , 200 ... 299 ~= statusCode else {
+                sendError(ErrorCodes.httpUnsucessful.rawValue, errorString: ErrorCodes.httpUnsucessful.description)
                 return
             }
             
             self.convertDataWithCompletionHandler(data!, completionHandlerForConvertData: completionHandler)
-        }
+        }) 
         
         task.resume()
         
@@ -67,57 +66,57 @@ class FlickrClient {
     // MARK: - Helpers
     
     // substitute the key for the value that is contained within the method name
-    func subtituteKeyInMethod(method: String, key: String, value: String) -> String? {
-        if method.rangeOfString("{\(key)}") != nil {
-            return method.stringByReplacingOccurrencesOfString("{\(key)}", withString: value)
+    func subtituteKeyInMethod(_ method: String, key: String, value: String) -> String? {
+        if method.range(of: "{\(key)}") != nil {
+            return method.replacingOccurrences(of: "{\(key)}", with: value)
         } else {
             return nil
         }
     }
     
     // given a Dictionary, return a JSON String
-    private func convertObjectToJSONData(object: AnyObject) -> NSData{
+    fileprivate func convertObjectToJSONData(_ object: AnyObject) -> Data{
         
-        var parsedResult: AnyObject!
+        var parsedResult: Any!
         do {
-            parsedResult = try NSJSONSerialization.dataWithJSONObject(object, options: NSJSONWritingOptions(rawValue: 0))
+            parsedResult = try JSONSerialization.data(withJSONObject: object, options: JSONSerialization.WritingOptions(rawValue: 0))
         }
         catch {
-            return NSData()
+            return Data()
         }
         
-        return parsedResult as! NSData
+        return parsedResult as! Data
     }
     
     // given raw JSON, return a usable Foundation object
-    private func convertDataWithCompletionHandler(data: NSData, completionHandlerForConvertData: (result: AnyObject!, error: NSError?) -> Void) {
+    fileprivate func convertDataWithCompletionHandler(_ data: Data, completionHandlerForConvertData: (_ result: Any?, _ error: NSError?) -> Void) {
         
-        var parsedResult: AnyObject!
+        var parsedResult: Any?
         do {
-            parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+            parsedResult = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
         } catch {
             let userInfo = [NSLocalizedDescriptionKey : "Could not parse the data as JSON: '\(data)'"]
-            completionHandlerForConvertData(result: nil, error: NSError(domain: "convertDataWithCompletionHandler", code: 1, userInfo: userInfo))
+            completionHandlerForConvertData(nil, NSError(domain: "convertDataWithCompletionHandler", code: 1, userInfo: userInfo))
         }
         
-        completionHandlerForConvertData(result: parsedResult, error: nil)
+        completionHandlerForConvertData(parsedResult, nil)
     }
     
     // create a URL from parameters
-    private func URLFromParameters(parameters: [String:AnyObject], withPathExtension: String? = nil) -> NSURL {
+    fileprivate func URLFromParameters(_ parameters: [String:Any], withPathExtension: String? = nil) -> URL {
         
-        let components = NSURLComponents()
+        var components = URLComponents()
         components.scheme = API.Scheme
         components.host = API.Host
         components.path = API.Path + (withPathExtension ?? "")
-        components.queryItems = [NSURLQueryItem]()
+        components.queryItems = [URLQueryItem]()
         
         for (key, value) in parameters {
-            let queryItem = NSURLQueryItem(name: key, value: "\(value)")
+            let queryItem = URLQueryItem(name: key, value: "\(value)")
             components.queryItems!.append(queryItem)
         }
         
-        return components.URL!
+        return components.url!
     }
 
 }

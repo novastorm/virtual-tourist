@@ -12,11 +12,16 @@ import MapKit
 class PinAnnotation: NSObject, MKAnnotation {
     
     var coordinate: CLLocationCoordinate2D {
-        
-        return CLLocationCoordinate2D(
-            latitude: pin.latitude ,
-            longitude: pin.longitude 
-        )
+        get{
+            return CLLocationCoordinate2D(
+                latitude: pin.latitude ,
+                longitude: pin.longitude
+            )
+        }
+        set {
+            pin.latitude = newValue.latitude
+            pin.longitude = newValue.longitude
+        }
     }
     var title: String?
     var subtitle: String?

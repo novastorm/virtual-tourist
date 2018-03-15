@@ -9,27 +9,27 @@
 import Foundation
 
 enum ErrorCodes: Int, CustomStringConvertible {
-    case GenericError
-    case NetworkError
-    case GenericRequestError
-    case HTTPUnsucessful
-    case NoData
-    case DataError
+    case genericError
+    case networkError
+    case genericRequestError
+    case httpUnsucessful
+    case noData
+    case dataError
     
     var description: String {
         get {
             switch self {
-            case .GenericError:
+            case .genericError:
                 return "Generic Error"
-            case .NetworkError:
+            case .networkError:
                 return "Network Error"
-            case .GenericRequestError:
+            case .genericRequestError:
                 return "There was an error with the request."
-            case .HTTPUnsucessful:
+            case .httpUnsucessful:
                 return "Request returned a status code other that 2XX!"
-            case .NoData:
+            case .noData:
                 return "No data returned by the request"
-            case .DataError:
+            case .dataError:
                 return "There was a data error"
             }
         }

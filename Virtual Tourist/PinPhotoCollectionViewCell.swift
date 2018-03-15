@@ -13,7 +13,7 @@ class PinPhotoCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
-    func showImage(imageData: NSData) {
+    func showImage(_ imageData: Data) {
         activityIndicator.stopAnimating()
         imageView.image = UIImage(data: imageData)
     }
@@ -21,6 +21,6 @@ class PinPhotoCollectionViewCell: UICollectionViewCell {
     func showLoading() {
         imageView.image = nil
         activityIndicator.startAnimating()
-        activityIndicator.hidden = false
+        activityIndicator.isHidden = false
     }
 }

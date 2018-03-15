@@ -1,9 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="g9g-MZ-463">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="g9g-MZ-463">
+    <device id="retina5_5" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--Map-->
@@ -15,18 +19,18 @@
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="h5d-mS-9Os">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                                 <gestureRecognizers/>
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="JKC-ma-Qt3" appends="YES" id="JAf-gO-rqG"/>
                                 </connections>
                             </mapView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="h5d-mS-9Os" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-20" id="4SI-HL-pjl"/>
@@ -50,7 +54,7 @@
                     </connections>
                 </pongPressGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="819" y="421"/>
+            <point key="canvasLocation" x="818.84057971014499" y="420.6521739130435"/>
         </scene>
         <!--Pin Detail View Controller-->
         <scene sceneID="jmF-th-Rga">
@@ -61,11 +65,11 @@
                         <viewControllerLayoutGuide type="bottom" id="TqF-c1-UQr"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="dAa-Ju-cVa">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="1hz-ea-onK">
-                                <rect key="frame" x="0.0" y="64" width="600" height="537"/>
+                                <rect key="frame" x="0.0" y="64" width="414" height="672"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="H8a-b0-hop">
                                     <size key="itemSize" width="100" height="100"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -84,7 +88,6 @@
                                                     <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                 </mapView>
                                             </subviews>
-                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <constraints>
                                             <constraint firstItem="QZm-q5-kgx" firstAttribute="top" secondItem="pt3-4t-J8W" secondAttribute="topMargin" constant="-8" id="Fsg-xq-5Oh"/>
@@ -97,7 +100,7 @@
                                         </connections>
                                     </collectionViewCell>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PinPhoto" id="55o-gh-lP0" customClass="PinPhotoCollectionViewCell" customModule="Virtual_Tourist" customModuleProvider="target">
-                                        <rect key="frame" x="125" y="0.0" width="100" height="100"/>
+                                        <rect key="frame" x="157" y="0.0" width="100" height="100"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                             <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
@@ -108,9 +111,9 @@
                                                 </imageView>
                                                 <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="M6m-oy-81Y">
                                                     <rect key="frame" x="32" y="31" width="37" height="37"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 </activityIndicatorView>
                                             </subviews>
-                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <constraints>
                                             <constraint firstItem="yow-v6-Nu3" firstAttribute="top" secondItem="55o-gh-lP0" secondAttribute="topMargin" constant="-8" id="3Mm-ok-cJO"/>
@@ -130,9 +133,9 @@
                                 </connections>
                             </collectionView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstAttribute="bottomMargin" secondItem="1hz-ea-onK" secondAttribute="bottom" constant="-1" id="8CR-eh-HVH"/>
+                            <constraint firstAttribute="bottomMargin" secondItem="1hz-ea-onK" secondAttribute="bottom" id="8CR-eh-HVH"/>
                             <constraint firstItem="1hz-ea-onK" firstAttribute="leading" secondItem="dAa-Ju-cVa" secondAttribute="leadingMargin" constant="-20" id="CJ9-gh-1Sm"/>
                             <constraint firstItem="1hz-ea-onK" firstAttribute="top" secondItem="bAN-si-9kn" secondAttribute="bottom" id="nMN-HB-Csl"/>
                             <constraint firstAttribute="trailingMargin" secondItem="1hz-ea-onK" secondAttribute="trailing" constant="-20" id="tAv-8O-iGB"/>
@@ -153,7 +156,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cSk-p7-tCx" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2333" y="421"/>
+            <point key="canvasLocation" x="2331.8840579710145" y="420.6521739130435"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="b0I-gU-skw">
