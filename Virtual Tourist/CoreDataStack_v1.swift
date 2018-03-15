@@ -134,18 +134,17 @@ final class CoreDataStack_v1: CoreDataStack {
     func clearDatabase() throws {
         try coordinator.destroyPersistentStore(at: dbURL, ofType:NSSQLiteStoreType , options: nil)
         
-        try addStoreTo(coordinator: self.coordinator, storeType: NSSQLiteStoreType, configuration: nil, storeURL: dbURL, options: nil)
+        try addStoreTo(coordinator: coordinator, storeType: NSSQLiteStoreType, configuration: nil, storeURL: dbURL, options: nil)
     }
 
     
     // MARK:  - Batch processing in the background
     func performBackgroundBatchOperation(_ batch: @escaping BatchTask) {
         
-        backgroundContext.perform(){
+        backgroundContext.perform() {
             batch(self.backgroundContext)
             
-            // Save it to the parent context, so normal saving
-            // can work
+            // Save it to the parent context, so normal saving can work.
             do {
                 try self.backgroundContext.save()
             }
@@ -160,14 +159,13 @@ final class CoreDataStack_v1: CoreDataStack {
         // Called synchronously, but it's a very fast
         // operation (it doesn't hit the disk). The app needs to know
         // when it ends so it can call the next save (on the persisting
-        // context). This last one might take some time and is done
-        // in a background queue
+        // context). Saving on the persisting context might take some time and
+        // is done in a background queue.
         
         performUIUpdatesOnMain {
             guard self.mainContext.hasChanges else {
                 return
             }
-            //            print("\(type(of: self)) \(#function) save")
             do {
                 try self.mainContext.save()
             }
@@ -177,7 +175,7 @@ final class CoreDataStack_v1: CoreDataStack {
                 fatalError("Error while saving main context:")
             }
             
-            // now we save in the background
+            // Save the persisting context which occurs in the background.
             
             self.savePersistingContext()
         }

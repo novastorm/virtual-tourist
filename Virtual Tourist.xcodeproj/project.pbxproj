@@ -15,7 +15,6 @@
 		3E1971CA1CE3FF81004FC65E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3E1971C81CE3FF81004FC65E /* LaunchScreen.storyboard */; };
 		3E1971D21CE54BD3004FC65E /* Utilites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1971D11CE54BD3004FC65E /* Utilites.swift */; };
 		3E1971D41CE54C3A004FC65E /* GCDUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1971D31CE54C3A004FC65E /* GCDUtilities.swift */; };
-		3E1971D61CE54CEC004FC65E /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1971D51CE54CEC004FC65E /* CoreDataStackManager.swift */; };
 		3E1971DB1CE55EFC004FC65E /* Pin+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1971D91CE55EFC004FC65E /* Pin+CoreDataProperties.swift */; };
 		3E1971DC1CE55EFC004FC65E /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1971DA1CE55EFC004FC65E /* Pin.swift */; };
 		3E57B2191D0519BA00B7B806 /* MapCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E57B2181D0519BA00B7B806 /* MapCollectionCell.swift */; };
@@ -43,7 +42,6 @@
 		3E1971CB1CE3FF81004FC65E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3E1971D11CE54BD3004FC65E /* Utilites.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilites.swift; sourceTree = "<group>"; };
 		3E1971D31CE54C3A004FC65E /* GCDUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GCDUtilities.swift; sourceTree = "<group>"; };
-		3E1971D51CE54CEC004FC65E /* CoreDataStackManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStackManager.swift; sourceTree = "<group>"; };
 		3E1971D91CE55EFC004FC65E /* Pin+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Pin+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3E1971DA1CE55EFC004FC65E /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
 		3E1971DE1CEA0F2D004FC65E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -117,7 +115,6 @@
 		3E1971D71CE55A79004FC65E /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				3E1971D51CE54CEC004FC65E /* CoreDataStackManager.swift */,
 				3E6A3E9F1CF39A1600346705 /* CoreDataStack_v1.swift */,
 				3EA1EE5A205B055700209990 /* CoreDataStackProtocol.swift */,
 			);
@@ -178,7 +175,7 @@
 					3E1971B81CE3FF81004FC65E = {
 						CreatedOnToolsVersion = 7.3.1;
 						DevelopmentTeam = KY9W9NLJDU;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0920;
 					};
 				};
 			};
@@ -237,7 +234,6 @@
 				3E1971C51CE3FF81004FC65E /* Virtual_Tourist.xcdatamodeld in Sources */,
 				3EA1EE5B205B055700209990 /* CoreDataStackProtocol.swift in Sources */,
 				3E1971BD1CE3FF81004FC65E /* AppDelegate.swift in Sources */,
-				3E1971D61CE54CEC004FC65E /* CoreDataStackManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,7 +368,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.4mfd.Virtual-Tourist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -386,7 +383,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.4mfd.Virtual-Tourist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;

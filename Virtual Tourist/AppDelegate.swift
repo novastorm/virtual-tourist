@@ -13,6 +13,8 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    let coreDataStack: CoreDataStack = CoreDataStack_v1(modelName: "Virtual_Tourist")!
+    
     struct UserDefaultKeys {
         static let HasLaunchedBefore = "hasLaunchedBefore"
         static let MapViewRegion = "mapViewRegion"
