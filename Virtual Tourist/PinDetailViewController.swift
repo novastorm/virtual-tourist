@@ -32,12 +32,12 @@ class PinDetailViewController: UIViewController {
     var insertedIndexPaths: [IndexPath]!
     var deletedIndexPaths: [IndexPath]!
     var updatedIndexPaths: [IndexPath]!
+
     
-    
-    // MARK: - Core Data convenience methods
+    // MARK: - Core Data
     
     let coreDataStack: CoreDataStack!
-    
+
     var sharedMainContext: NSManagedObjectContext {
         return coreDataStack.mainContext
     }
@@ -60,8 +60,13 @@ class PinDetailViewController: UIViewController {
     func saveTempContext(_ context: NSManagedObjectContext) {
         coreDataStack.saveTemporaryContext(context)
     }
+
+
+    // MARK: - Flickr
     
-    
+    let flickrClient: FlickrClient!
+
+
     // MARK: - View Cycle
     
     override var prefersStatusBarHidden : Bool {
@@ -69,14 +74,19 @@ class PinDetailViewController: UIViewController {
     }
     
     init?(coder aDecoder: NSCoder,
-          coreDataStack: CoreDataStack = (UIApplication.shared.delegate as! AppDelegate).coreDataStack) {
+          coreDataStack: CoreDataStack = (UIApplication.shared.delegate as! AppDelegate).coreDataStack,
+          flickrClient: FlickrClient = (UIApplication.shared.delegate as! AppDelegate).flickrClient
+        ) {
         self.coreDataStack = coreDataStack
+        self.flickrClient = flickrClient
         super.init(coder: aDecoder)
     }
     
     required convenience init?(coder aDecoder: NSCoder) {
         self.init(coder: aDecoder,
-                  coreDataStack: (UIApplication.shared.delegate as! AppDelegate).coreDataStack)
+                  coreDataStack: (UIApplication.shared.delegate as! AppDelegate).coreDataStack,
+                  flickrClient: (UIApplication.shared.delegate as! AppDelegate).flickrClient
+        )
     }
 
     override func viewDidLoad() {
@@ -119,6 +129,7 @@ class PinDetailViewController: UIViewController {
         flowLayout.invalidateLayout()
     }
     
+    
     // MARK: - Actions
     
     @IBAction func getNewCollection(_ sender: AnyObject) {
@@ -126,6 +137,7 @@ class PinDetailViewController: UIViewController {
         clearPhotos()
         getPhotos()
     }
+    
     
     // MARK: - Helpers
     
@@ -148,7 +160,7 @@ class PinDetailViewController: UIViewController {
         lat = self.annotation.pin.latitude
         lon = self.annotation.pin.longitude 
         
-        let _ = FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
+        let _ = flickrClient.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
             if let error = error {
                 print(error)
                 return
@@ -162,7 +174,7 @@ class PinDetailViewController: UIViewController {
             
             let randomPage = random(pages, start: 1)
             
-            let _ = FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon, page: randomPage) { (results, error) in
+            let _ = self.flickrClient.searchByLocation(latitude: lat, longitude: lon, page: randomPage) { (results, error) in
                 
                 if let error = error {
                     print(error)

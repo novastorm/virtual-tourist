@@ -6,7 +6,6 @@
 //  Copyright © 2016 Adland Lee. All rights reserved.
 //
 
-import CoreData
 import MapKit
 import UIKit
 
@@ -21,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     let coreDataStack: CoreDataStack = CoreDataStack_v1(modelName: "Virtual_Tourist")!
+    let flickrClient = FlickrClient()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {        
         checkIfFirstLaunch()
