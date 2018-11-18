@@ -10,36 +10,37 @@ import CoreData
 import MapKit
 import UIKit
 
+struct TravelLocationsViewControllerDependency {
+    
+    var coreDataStack: CoreDataStack!
+    
+    init(
+        coreDataStack: CoreDataStack = (UIApplication.shared.delegate as! AppDelegate).coreDataStack
+    ) {
+        self.coreDataStack = coreDataStack
+    }
+}
 
 class TravelLocationsViewController: UIViewController {
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet var longPressGestureRecognizer: UILongPressGestureRecognizer!
     
-    let coreDataStack: CoreDataStack!
+    let dependencies: TravelLocationsViewControllerDependency!
+    var coreDataStack: CoreDataStack {
+        return dependencies.coreDataStack
+    }
     
     // MARK: - Core Data convenience methods
-    
-    var sharedMainContext: NSManagedObjectContext {
-        return coreDataStack.mainContext
-    }
     
     lazy var fetchedResultsController: NSFetchedResultsController<Pin> = {
         let fetchRequest  = Pin.fetchRequest() as! NSFetchRequest<Pin>
         fetchRequest.sortDescriptors = []
         
-        let fetchedResultsController = NSFetchedResultsController<Pin>(fetchRequest: fetchRequest, managedObjectContext: self.sharedMainContext, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController<Pin>(fetchRequest: fetchRequest, managedObjectContext: coreDataStack.mainContext, sectionNameKeyPath: nil, cacheName: nil)
         
         return fetchedResultsController
     }()
-    
-    func saveContext() {
-        coreDataStack.saveMainContext()
-    }
-    
-    func saveTempContext(_ context: NSManagedObjectContext) {
-        coreDataStack.saveTemporaryContext(context)
-    }
     
     // MARK: - View Cycle
     
@@ -47,15 +48,21 @@ class TravelLocationsViewController: UIViewController {
         return true
     }
     
-    init?(coder aDecoder: NSCoder,
-          coreDataStack: CoreDataStack = (UIApplication.shared.delegate as! AppDelegate).coreDataStack) {
-        self.coreDataStack = coreDataStack
-        super.init(coder: aDecoder)
+    init?(coder aDecoder: NSCoder?, dependencies: TravelLocationsViewControllerDependency = TravelLocationsViewControllerDependency()) {
+        self.dependencies = dependencies
+        if let aDecoder = aDecoder {
+            super.init(coder: aDecoder)
+        }
+        else {
+            super.init()
+        }
     }
     
     required convenience init?(coder aDecoder: NSCoder) {
-        self.init(coder: aDecoder,
-                  coreDataStack: (UIApplication.shared.delegate as! AppDelegate).coreDataStack)
+        self.init(
+            coder: aDecoder,
+            dependencies: TravelLocationsViewControllerDependency()
+        )
     }
     
     override func viewDidLoad() {
@@ -146,9 +153,9 @@ class TravelLocationsViewController: UIViewController {
         
         let mapCoordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
         
-        let pin = Pin(lat: mapCoordinate.latitude, lon: mapCoordinate.longitude, context: self.sharedMainContext)
-        
-        saveContext()
+        let pin = Pin(lat: mapCoordinate.latitude, lon: mapCoordinate.longitude, context: coreDataStack.mainContext)
+
+        coreDataStack.saveMainContext()
         
         let annotation = PinAnnotation(withPin: pin)
         mapView.addAnnotation(annotation)
@@ -194,7 +201,7 @@ extension TravelLocationsViewController: MKMapViewDelegate {
         
         let pinDetailVC = storyboard?.instantiateViewController(withIdentifier: "PinDetailViewController") as! PinDetailViewController
         
-        pinDetailVC.annotation = view.annotation as! PinAnnotation
+        pinDetailVC.annotation = view.annotation as? PinAnnotation
   
         navigationController!.pushViewController(pinDetailVC, animated: true)
 //        presentingViewController?.performSegue(withIdentifier: "ShowPinDetail", sender: self)

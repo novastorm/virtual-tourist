@@ -10,6 +10,20 @@ import CoreData
 import MapKit
 import UIKit
 
+struct PinDetailViewControllerDependency {
+    
+    var coreDataStack: CoreDataStack!
+    var flickrClient: FlickrClient!
+    
+    init(
+        coreDataStack: CoreDataStack = (UIApplication.shared.delegate as! AppDelegate).coreDataStack,
+        flickrClient: FlickrClient = (UIApplication.shared.delegate as! AppDelegate).flickrClient
+    ) {
+        self.coreDataStack = coreDataStack
+        self.flickrClient = flickrClient
+    }
+}
+
 class PinDetailViewController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
@@ -33,38 +47,31 @@ class PinDetailViewController: UIViewController {
     var deletedIndexPaths: [IndexPath]!
     var updatedIndexPaths: [IndexPath]!
 
+    let dependencies: PinDetailViewControllerDependency!
     
     // MARK: - Core Data
     
-    let coreDataStack: CoreDataStack!
-
-    var sharedMainContext: NSManagedObjectContext {
-        return coreDataStack.mainContext
+    var coreDataStack: CoreDataStack {
+        return dependencies.coreDataStack
     }
-    
+
     lazy var fetchedResultsController: NSFetchedResultsController<Photo> = {
         
         let fetchRequest = Photo.fetchRequest()
         fetchRequest.sortDescriptors = []
         fetchRequest.predicate = NSPredicate(format: "pin = %@", self.annotation.pin)
         
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedMainContext, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: coreDataStack.mainContext, sectionNameKeyPath: nil, cacheName: nil)
         
         return fetchedResultsController as! NSFetchedResultsController<Photo>
     }()
-    
-    func saveContext() {
-        coreDataStack.saveMainContext()
-    }
-    
-    func saveTempContext(_ context: NSManagedObjectContext) {
-        coreDataStack.saveTemporaryContext(context)
-    }
 
 
     // MARK: - Flickr
     
-    let flickrClient: FlickrClient!
+    var flickrClient: FlickrClient {
+        return dependencies.flickrClient
+    }
 
 
     // MARK: - View Cycle
@@ -73,19 +80,21 @@ class PinDetailViewController: UIViewController {
         return true
     }
     
-    init?(coder aDecoder: NSCoder,
-          coreDataStack: CoreDataStack = (UIApplication.shared.delegate as! AppDelegate).coreDataStack,
-          flickrClient: FlickrClient = (UIApplication.shared.delegate as! AppDelegate).flickrClient
-        ) {
-        self.coreDataStack = coreDataStack
-        self.flickrClient = flickrClient
-        super.init(coder: aDecoder)
+    init?(coder aDecoder: NSCoder? = nil,
+          dependencies: PinDetailViewControllerDependency = PinDetailViewControllerDependency()) {
+        self.dependencies = dependencies
+        if let aDecoder = aDecoder {
+            super.init(coder: aDecoder)
+        }
+        else {
+            super.init()
+        }
     }
     
     required convenience init?(coder aDecoder: NSCoder) {
-        self.init(coder: aDecoder,
-                  coreDataStack: (UIApplication.shared.delegate as! AppDelegate).coreDataStack,
-                  flickrClient: (UIApplication.shared.delegate as! AppDelegate).flickrClient
+        self.init(
+            coder: aDecoder,
+            dependencies: PinDetailViewControllerDependency()
         )
     }
 
@@ -198,7 +207,7 @@ class PinDetailViewController: UIViewController {
                         photo.pin = pin
                     }
                 }
-                self.saveContext()
+                self.coreDataStack.saveMainContext()
             }
         }
     }
@@ -212,15 +221,15 @@ class PinDetailViewController: UIViewController {
                     break
                 }
             }
-            self.saveContext()
+            self.coreDataStack.saveMainContext()
         }
     }
     
     func clearPhotos() {
         for object in self.fetchedResultsController.fetchedObjects! {
-            self.sharedMainContext.delete(object)
+            self.coreDataStack.mainContext.delete(object)
         }
-        saveContext()
+        coreDataStack.saveMainContext()
     }
     
     func enableNewCollectionButton(_ state: Bool, remaining count: Int = 0) {
@@ -247,6 +256,7 @@ extension PinDetailViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        
         
         let sectionInfo = fetchedResultsController.sections![section]
         
@@ -313,7 +323,7 @@ extension PinDetailViewController: UICollectionViewDataSource {
                         cellToUpdate.showImage(pendingImageData)
                     }
                 }
-                self.saveContext()
+                self.coreDataStack.saveMainContext()
             }
             
             return
@@ -348,7 +358,7 @@ extension PinDetailViewController: UICollectionViewDelegate {
             workerContext.delete(photoInContext)
         }
         
-        saveContext()
+        coreDataStack.saveMainContext()
     }
 }
 
@@ -363,7 +373,13 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
         updatedIndexPaths = [IndexPath]()
     }
     
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+    func controller(
+        _ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange anObject: Any,
+        at indexPath: IndexPath?,
+        for type: NSFetchedResultsChangeType,
+        newIndexPath: IndexPath?
+        ) {
         
     
         switch type {

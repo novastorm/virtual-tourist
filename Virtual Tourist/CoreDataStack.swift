@@ -7,18 +7,23 @@
 //
 import CoreData
 
+// MARK:  - Notifications
+extension Notification.Name {
+    static let CoreDataStackImportingTaskDidFinishNotification = Notification.Name("CoreDataStackImportingTaskDidFinish")
+}
+
 protocol CoreDataStack {
-    
+
+    // MARK:  - TypeAliases
     typealias BatchTask=(_ workerContext: NSManagedObjectContext) -> ()
-    
-    // MARK:  - Properties
+
+    // MARK: - Properties
     var mainContext: NSManagedObjectContext { get }
-    
-    // MARK:  - Initializers
-    init?(modelName: String)
-    
-    // MARK:  - Removing data
+        
+    // MARK: - Removing data
     func clearDatabase() throws
+    
+    // MARK: - Operations
     
     func getScratchContext(named name: String) -> NSManagedObjectContext
 
@@ -32,17 +37,6 @@ protocol CoreDataStack {
     
     func savePersistingContext()
     
-    func autoSave(_ delayInSeconds : Int)
+    func autoSave(_ interval : TimeInterval)
 }
-
-
-
-
-
-
-
-
-
-
-
 

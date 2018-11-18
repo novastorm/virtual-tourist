@@ -1,16 +1,9 @@
 import CoreData
 
-// MARK:  - TypeAliases
-typealias BatchTask=(_ workerContext: NSManagedObjectContext) -> ()
-
-// MARK:  - Notifications
-extension Notification.Name {
-    static let CoreDataStackImportingTaskDidFinishNotification = Notification.Name("CoreDataStackImportingTaskDidFinish")
-}
-
 // MARK:  - Main
 class CoreDataStack_v1: CoreDataStack {
     
+
     // MARK:  - Properties
     fileprivate let model : NSManagedObjectModel
     fileprivate let coordinator : NSPersistentStoreCoordinator
@@ -19,14 +12,14 @@ class CoreDataStack_v1: CoreDataStack {
     fileprivate let persistingContext : NSManagedObjectContext
     fileprivate let backgroundContext : NSManagedObjectContext
     let mainContext : NSManagedObjectContext
-    
+
     
     // MARK:  - Initializers
-    required init?(modelName: String){
+    required init?(name: String){
         
         // Assumes the model is in the main bundle
-        guard let modelURL = Bundle.main.url(forResource: modelName, withExtension: "momd") else {
-            print("Unable to find \(modelName) in the main bundle")
+        guard let modelURL = Bundle.main.url(forResource: name, withExtension: "momd") else {
+            print("Unable to find \(name) in the main bundle")
             return nil}
         
         self.modelURL = modelURL
@@ -66,7 +59,7 @@ class CoreDataStack_v1: CoreDataStack {
             return nil
         }
         
-        self.dbURL = docUrl.appendingPathComponent(modelName + ".sqlite")
+        self.dbURL = docUrl.appendingPathComponent(name + ".sqlite")
         
         do{
             try addStoreTo(coordinator: coordinator,
@@ -193,17 +186,16 @@ class CoreDataStack_v1: CoreDataStack {
     }
     
     
-    func autoSave(_ delayInSeconds : Int){
+    func autoSave(_ interval : TimeInterval){
         
-        if delayInSeconds > 0 {
+        if interval > 0 {
             
             saveMainContext()
             
-            let delayInNanoSeconds = UInt64(delayInSeconds) * NSEC_PER_SEC
-            let time = DispatchTime.now() + Double(Int64(delayInNanoSeconds)) / Double(NSEC_PER_SEC)
+            let time = DispatchTime.now() + interval
             
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                self.autoSave(delayInSeconds)
+                self.autoSave(interval)
             })
             
         }
