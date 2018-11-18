@@ -10,6 +10,20 @@ import CoreData
 import MapKit
 import UIKit
 
+struct PinDetailViewControllerDependency {
+    
+    var coreDataStack: CoreDataStack!
+    var flickrClient: FlickrClient!
+    
+    init(
+        coreDataStack: CoreDataStack = (UIApplication.shared.delegate as! AppDelegate).coreDataStack,
+        flickrClient: FlickrClient = (UIApplication.shared.delegate as! AppDelegate).flickrClient
+    ) {
+        self.coreDataStack = coreDataStack
+        self.flickrClient = flickrClient
+    }
+}
+
 class PinDetailViewController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
@@ -32,40 +46,58 @@ class PinDetailViewController: UIViewController {
     var insertedIndexPaths: [IndexPath]!
     var deletedIndexPaths: [IndexPath]!
     var updatedIndexPaths: [IndexPath]!
+
+    let dependencies: PinDetailViewControllerDependency!
     
+    // MARK: - Core Data
     
-    // MARK: - Core Data convenience methods
-    
-    var sharedMainContext: NSManagedObjectContext {
-        return CoreDataStackManager.sharedInstance.mainContext
+    var coreDataStack: CoreDataStack {
+        return dependencies.coreDataStack
     }
-    
+
     lazy var fetchedResultsController: NSFetchedResultsController<Photo> = {
         
         let fetchRequest = Photo.fetchRequest()
         fetchRequest.sortDescriptors = []
         fetchRequest.predicate = NSPredicate(format: "pin = %@", self.annotation.pin)
         
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedMainContext, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: coreDataStack.mainContext, sectionNameKeyPath: nil, cacheName: nil)
         
         return fetchedResultsController as! NSFetchedResultsController<Photo>
     }()
+
+
+    // MARK: - Flickr
     
-    func saveContext() {
-        CoreDataStackManager.sharedInstance.saveMainContext()
+    var flickrClient: FlickrClient {
+        return dependencies.flickrClient
     }
-    
-    func saveTempContext(_ context: NSManagedObjectContext) {
-        CoreDataStackManager.sharedInstance.saveTempContext(context)
-    }
-    
-    
+
+
     // MARK: - View Cycle
     
     override var prefersStatusBarHidden : Bool {
         return true
     }
     
+    init?(coder aDecoder: NSCoder? = nil,
+          dependencies: PinDetailViewControllerDependency = PinDetailViewControllerDependency()) {
+        self.dependencies = dependencies
+        if let aDecoder = aDecoder {
+            super.init(coder: aDecoder)
+        }
+        else {
+            super.init()
+        }
+    }
+    
+    required convenience init?(coder aDecoder: NSCoder) {
+        self.init(
+            coder: aDecoder,
+            dependencies: PinDetailViewControllerDependency()
+        )
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         newCollectionButton.possibleTitles = [
@@ -83,9 +115,6 @@ class PinDetailViewController: UIViewController {
         }
         
         fetchedResultsController.delegate = self
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(saveContext), name: NSNotification.Name(rawValue: CoreDataStackNotifications.ImportingTaskDidFinish.rawValue), object: nil)
-        
         
         var numberOfPhotos = 0
         
@@ -109,6 +138,7 @@ class PinDetailViewController: UIViewController {
         flowLayout.invalidateLayout()
     }
     
+    
     // MARK: - Actions
     
     @IBAction func getNewCollection(_ sender: AnyObject) {
@@ -116,6 +146,7 @@ class PinDetailViewController: UIViewController {
         clearPhotos()
         getPhotos()
     }
+    
     
     // MARK: - Helpers
     
@@ -138,7 +169,7 @@ class PinDetailViewController: UIViewController {
         lat = self.annotation.pin.latitude
         lon = self.annotation.pin.longitude 
         
-        let _ = FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
+        let _ = flickrClient.searchByLocation(latitude: lat, longitude: lon) { (results, error) in
             if let error = error {
                 print(error)
                 return
@@ -152,7 +183,7 @@ class PinDetailViewController: UIViewController {
             
             let randomPage = random(pages, start: 1)
             
-            let _ = FlickrClient.sharedInstance.searchByLocation(latitude: lat, longitude: lon, page: randomPage) { (results, error) in
+            let _ = self.flickrClient.searchByLocation(latitude: lat, longitude: lon, page: randomPage) { (results, error) in
                 
                 if let error = error {
                     print(error)
@@ -167,7 +198,7 @@ class PinDetailViewController: UIViewController {
                 // check for actual existing photos
                 // retry if page > 0 and photo array contains nothing
                 
-                CoreDataStackManager.sharedInstance.performBackgroundBatchOperation { (workerContext) in
+                self.coreDataStack.performBackgroundBatchOperation { (workerContext) in
                     let pin = workerContext.object(with: self.annotation.pin.objectID) as! Pin
                     
                     for record in photoResults {
@@ -176,13 +207,13 @@ class PinDetailViewController: UIViewController {
                         photo.pin = pin
                     }
                 }
-                self.saveContext()
+                self.coreDataStack.saveMainContext()
             }
         }
     }
     
     func downloadAnImage() {
-        CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
+        coreDataStack.performBackgroundBatchOperation { (workerContext) in
             for photo in self.fetchedResultsController.fetchedObjects! {
                 let photoInContext = try! workerContext.existingObject(with: photo.objectID) as! Photo
                 if photoInContext.imageData == nil {
@@ -190,15 +221,15 @@ class PinDetailViewController: UIViewController {
                     break
                 }
             }
-            self.saveContext()
+            self.coreDataStack.saveMainContext()
         }
     }
     
     func clearPhotos() {
         for object in self.fetchedResultsController.fetchedObjects! {
-            self.sharedMainContext.delete(object)
+            self.coreDataStack.mainContext.delete(object)
         }
-        saveContext()
+        coreDataStack.saveMainContext()
     }
     
     func enableNewCollectionButton(_ state: Bool, remaining count: Int = 0) {
@@ -226,6 +257,7 @@ extension PinDetailViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
+        
         let sectionInfo = fetchedResultsController.sections![section]
         
         return sectionInfo.numberOfObjects + numberOfStaticCells
@@ -245,10 +277,10 @@ extension PinDetailViewController: UICollectionViewDataSource {
         }
         else {
             cellIdentifier = "PinPhoto"
-            let indexPathAdjusted = IndexPath(item: (indexPath as NSIndexPath).item - numberOfStaticCells, section: 0)
-            let pinPhotoCell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPathAdjusted) as! PinPhotoCollectionViewCell
-            
-            configurePinPhotoCell(pinPhotoCell, atIndexPath: indexPathAdjusted)
+            let pinPhotoCell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! PinPhotoCollectionViewCell
+
+//            let indexPathAdjusted = IndexPath(item: (indexPath as NSIndexPath).item - numberOfStaticCells, section: 0)
+            configurePinPhotoCell(pinPhotoCell, atIndexPath: indexPath, adjustedBy: 1)
             cell = pinPhotoCell
         }
         
@@ -271,25 +303,27 @@ extension PinDetailViewController: UICollectionViewDataSource {
 
     }
     
-    func configurePinPhotoCell(_ cell: PinPhotoCollectionViewCell, atIndexPath indexPath: IndexPath) {
+    func configurePinPhotoCell(_ cell: PinPhotoCollectionViewCell, atIndexPath indexPath: IndexPath, adjustedBy adjustment: Int) {
 
-        let photo = fetchedResultsController.object(at: indexPath) 
+        let indexPathAdjusted = IndexPath(item: (indexPath as NSIndexPath).item - adjustment, section: 0)
+
+        let photo = fetchedResultsController.object(at: indexPathAdjusted)
         var imageData: Data!
         
         imageData = photo.imageData
         
         cell.showLoading()
         guard (imageData != nil) else {
-            CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
+            coreDataStack.performBackgroundBatchOperation { (workerContext) in
                 let photoInContext = workerContext.object(with: photo.objectID) as! Photo
                 let pendingImageData = photoInContext.getImageData()
                 // use normal indexPath for cell selection
-                if let cellToUpdate = self.collectionView.cellForItem(at: indexPath) as? PinPhotoCollectionViewCell {
-                    performUIUpdatesOnMain {
+                performUIUpdatesOnMain {
+                    if let cellToUpdate = self.collectionView.cellForItem(at: indexPath) as? PinPhotoCollectionViewCell {
                         cellToUpdate.showImage(pendingImageData)
                     }
                 }
-                self.saveContext()
+                self.coreDataStack.saveMainContext()
             }
             
             return
@@ -318,13 +352,13 @@ extension PinDetailViewController: UICollectionViewDelegate {
         let indexPathAdjusted = IndexPath(item: (indexPath as NSIndexPath).item - numberOfStaticCells, section: 0)
 
 
-        CoreDataStackManager.sharedInstance.performAsyncBackgroundBatchOperation { (workerContext) in
+        coreDataStack.performBackgroundBatchOperation { (workerContext) in
             let photo = self.fetchedResultsController.object(at: indexPathAdjusted) 
             let photoInContext = workerContext.object(with: photo.objectID)
             workerContext.delete(photoInContext)
         }
         
-        saveContext()
+        coreDataStack.saveMainContext()
     }
 }
 
@@ -339,7 +373,13 @@ extension PinDetailViewController: NSFetchedResultsControllerDelegate {
         updatedIndexPaths = [IndexPath]()
     }
     
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+    func controller(
+        _ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange anObject: Any,
+        at indexPath: IndexPath?,
+        for type: NSFetchedResultsChangeType,
+        newIndexPath: IndexPath?
+        ) {
         
     
         switch type {

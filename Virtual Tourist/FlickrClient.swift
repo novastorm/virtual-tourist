@@ -10,10 +10,10 @@ import Foundation
 
 class FlickrClient {
     
-    // MARK: Shared Instance
-    
-    static let sharedInstance = FlickrClient()
-    fileprivate init() {}
+//    // MARK: Shared Instance
+//    
+//    static let sharedInstance = FlickrClient()
+//    fileprivate init() {}
     
     
     // MARK: - Properties

@@ -6,33 +6,36 @@
 //  Copyright © 2016 Adland Lee. All rights reserved.
 //
 
-import CoreData
 import MapKit
 import UIKit
+import CoreData
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
+    
     struct UserDefaultKeys {
         static let HasLaunchedBefore = "hasLaunchedBefore"
         static let MapViewRegion = "mapViewRegion"
     }
     
     var window: UIWindow?
-    
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {        
+    let coreDataStack: CoreDataStack = CoreDataStack_v1(name: "Virtual_Tourist")!
+    let flickrClient = FlickrClient()
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+
         checkIfFirstLaunch()
-        CoreDataStackManager.sharedInstance.autoSave(60)
+        coreDataStack.autoSave(60)
         return true
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
-        CoreDataStackManager.sharedInstance.saveMainContext()
+        coreDataStack.saveMainContext()
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        CoreDataStackManager.sharedInstance.saveMainContext()
+        coreDataStack.saveMainContext()
     }
 
     // MARK: - Helpers
