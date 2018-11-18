@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let coreDataStack: CoreDataStack = CoreDataStack_v1(name: "Virtual_Tourist")!
     let flickrClient = FlickrClient()
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         checkIfFirstLaunch()
         coreDataStack.autoSave(60)
@@ -49,7 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let radius = 5000.0
             
             let coordinate = CLLocationCoordinate2DMake(lat, lon)
-            let region = MKCoordinateRegionMakeWithDistance(coordinate, radius, radius)
+            let region = MKCoordinateRegion.init(center: coordinate, latitudinalMeters: radius, longitudinalMeters: radius)
 
             // Set default to Udacity HQ
             UserDefaults.standard.set([

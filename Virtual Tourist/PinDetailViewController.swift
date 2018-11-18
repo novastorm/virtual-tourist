@@ -294,7 +294,7 @@ extension PinDetailViewController: UICollectionViewDataSource {
         let radius = distanceInMeters(kilometers: Double(viewScaleRadiusKm))
         
         let coordinate = CLLocationCoordinate2DMake(lat, lon)
-        let region = MKCoordinateRegionMakeWithDistance(coordinate, radius, radius)
+        let region = MKCoordinateRegion.init(center: coordinate, latitudinalMeters: radius, longitudinalMeters: radius)
         
         cell.mapView.setRegion(region, animated: true)
         
