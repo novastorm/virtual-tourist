@@ -48,7 +48,10 @@ class TravelLocationsViewController: UIViewController {
         return true
     }
     
-    init?(coder aDecoder: NSCoder?, dependencies: TravelLocationsViewControllerDependency = TravelLocationsViewControllerDependency()) {
+    init?(
+        coder aDecoder: NSCoder?,
+        dependencies: TravelLocationsViewControllerDependency = TravelLocationsViewControllerDependency()
+    ) {
         self.dependencies = dependencies
         if let aDecoder = aDecoder {
             super.init(coder: aDecoder)
@@ -58,12 +61,17 @@ class TravelLocationsViewController: UIViewController {
         }
     }
     
-    required convenience init?(coder aDecoder: NSCoder) {
-        self.init(
-            coder: aDecoder,
-            dependencies: TravelLocationsViewControllerDependency()
-        )
+    required init?(coder: NSCoder) {
+        self.dependencies = TravelLocationsViewControllerDependency()
+        super.init(coder: coder)
     }
+    
+//    required convenience init?(coder aDecoder: NSCoder) {
+//        self.init(
+//            coder: aDecoder,
+//            dependencies: TravelLocationsViewControllerDependency()
+//        )
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

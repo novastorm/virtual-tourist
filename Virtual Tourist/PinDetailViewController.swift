@@ -91,13 +91,18 @@ class PinDetailViewController: UIViewController {
         }
     }
     
-    required convenience init?(coder aDecoder: NSCoder) {
-        self.init(
-            coder: aDecoder,
-            dependencies: PinDetailViewControllerDependency()
-        )
-    }
+//    required convenience init?(coder aDecoder: NSCoder) {
+//        self.init(
+//            coder: aDecoder,
+//            dependencies: PinDetailViewControllerDependency()
+//        )
+//    }
 
+    required init?(coder: NSCoder) {
+        self.dependencies = PinDetailViewControllerDependency()
+        super.init(coder: coder)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         newCollectionButton.possibleTitles = [
